@@ -52,14 +52,20 @@ class MarkdownReportGenerator:
             # Content Performance
             f.write(self._generate_content_performance(analytics_data))
 
-            # Trends Analysis
-            f.write(self._generate_trends_section(analytics_data))
+            # Enhanced Content Insights
+            f.write(self._generate_enhanced_insights(analytics_data))
 
-            # Audience Demographics
-            f.write(self._generate_demographics_section(analytics_data))
+            # Trends Analysis (only if data exists)
+            if self._has_trends_data(analytics_data):
+                f.write(self._generate_trends_section(analytics_data))
 
-            # Best Posting Times
-            f.write(self._generate_best_times_section(analytics_data))
+            # Audience Demographics (only if data exists)
+            if self._has_demographics_data(analytics_data):
+                f.write(self._generate_demographics_section(analytics_data))
+
+            # Best Posting Times (only if data exists)
+            if self._has_best_times_data(analytics_data):
+                f.write(self._generate_best_times_section(analytics_data))
 
             # AI Strategic Insights
             if ai_insights.get('status') == 'success':
@@ -325,6 +331,162 @@ class MarkdownReportGenerator:
         output += "- Review optimal posting times section above\n"
         output += "- Maintain consistent posting schedule\n"
         output += "- Test different content formats\n\n"
+
+        return output
+
+    def _has_trends_data(self, data: Dict[str, Any]) -> bool:
+        """Check if trends data exists"""
+        trends = data.get('trends', {})
+        return bool(trends and any('error' not in v for v in trends.values()))
+
+    def _has_demographics_data(self, data: Dict[str, Any]) -> bool:
+        """Check if demographics data exists"""
+        demographics = data.get('demographics', {})
+        return bool(demographics and any('error' not in v for v in demographics.values()))
+
+    def _has_best_times_data(self, data: Dict[str, Any]) -> bool:
+        """Check if best times data exists and is not empty"""
+        best_times = data.get('best_times', {})
+        if not best_times:
+            return False
+        # Check if any platform has actual data (not just {"data": []})
+        for platform_data in best_times.values():
+            if isinstance(platform_data, dict):
+                data_array = platform_data.get('data', [])
+                if data_array and len(data_array) > 0:
+                    return True
+        return False
+
+    def _generate_enhanced_insights(self, data: Dict[str, Any]) -> str:
+        """Generate enhanced content insights section"""
+        enhanced_data = data.get('enhanced_content', {})
+
+        if not enhanced_data:
+            return ""
+
+        output = "\n---\n\n## 📊 Detailed Content Insights\n\n"
+
+        for platform, platform_data in enhanced_data.items():
+            output += f"### {platform.title()}\n\n"
+
+            # Posting Patterns
+            if 'posting_patterns' in platform_data:
+                patterns = platform_data['posting_patterns']
+                output += "#### 📅 Posting Patterns\n\n"
+
+                if 'posting_frequency' in patterns:
+                    freq = patterns['posting_frequency']
+                    output += f"- **Posts per week:** {freq.get('posts_per_week', 0):.1f}\n"
+                    output += f"- **Posts per day:** {freq.get('posts_per_day', 0):.2f}\n\n"
+
+                if 'most_active_hours' in patterns:
+                    output += "**Most Active Posting Hours:**\n"
+                    for hour, count in list(patterns['most_active_hours'].items())[:3]:
+                        output += f"- {hour}:00 - {count} posts\n"
+                    output += "\n"
+
+                if 'day_distribution' in patterns:
+                    output += "**Posts by Day of Week:**\n"
+                    days_sorted = sorted(patterns['day_distribution'].items(), key=lambda x: x[1], reverse=True)
+                    for day, count in days_sorted[:5]:
+                        output += f"- {day}: {count} posts\n"
+                    output += "\n"
+
+            # Engagement by Time
+            if 'engagement_by_time' in platform_data:
+                time_eng = platform_data['engagement_by_time']
+                output += "#### ⏰ Best Times to Post (Based on Actual Performance)\n\n"
+
+                if 'best_posting_hours' in time_eng:
+                    output += "**Top Performing Hours:**\n\n"
+                    output += "| Hour | Avg Engagement Rate | Avg Reach | Total Interactions |\n"
+                    output += "|------|-------------------|-----------|--------------------|\n"
+                    for hour, metrics in sorted(time_eng['best_posting_hours'].items())[:5]:
+                        output += f"| {hour}:00 | {metrics['avg_engagement']:.2f}% | {metrics['avg_reach']:,.0f} | {metrics['total_interactions']:,} |\n"
+                    output += "\n"
+
+                if 'best_posting_days' in time_eng:
+                    output += "**Top Performing Days:**\n\n"
+                    output += "| Day | Avg Engagement Rate | Avg Reach |\n"
+                    output += "|-----|-------------------|-----------||\n"
+                    for day, metrics in time_eng['best_posting_days'].items():
+                        output += f"| {day} | {metrics['avg_engagement']:.2f}% | {metrics['avg_reach']:,.0f} |\n"
+                    output += "\n"
+
+            # Content Length Analysis
+            if 'content_length' in platform_data:
+                length_data = platform_data['content_length']
+                output += "#### 📝 Content Length Analysis\n\n"
+
+                output += f"- **Average caption length:** {length_data.get('avg_text_length', 0):.0f} characters\n"
+                output += f"- **Median caption length:** {length_data.get('median_text_length', 0):.0f} characters\n\n"
+
+                if 'length_vs_engagement' in length_data:
+                    output += "**Engagement by Content Length:**\n\n"
+                    output += "| Length Category | Avg Engagement | Post Count |\n"
+                    output += "|----------------|----------------|------------|\n"
+                    for category, metrics in length_data['length_vs_engagement'].items():
+                        output += f"| {category} | {metrics['avg_engagement']:.2f}% | {metrics['post_count']} |\n"
+                    output += "\n"
+
+            # Hashtag Analysis
+            if 'hashtag_analysis' in platform_data:
+                hashtag_data = platform_data['hashtag_analysis']
+                output += "#### #️⃣ Hashtag Analysis\n\n"
+
+                total_posts = hashtag_data.get('posts_with_hashtags', 0) + hashtag_data.get('posts_without_hashtags', 0)
+                if total_posts > 0:
+                    hashtag_pct = (hashtag_data.get('posts_with_hashtags', 0) / total_posts) * 100
+                    output += f"- **Posts with hashtags:** {hashtag_data.get('posts_with_hashtags', 0)} ({hashtag_pct:.1f}%)\n"
+                    output += f"- **Average hashtags per post:** {hashtag_data.get('avg_hashtags_per_post', 0):.1f}\n\n"
+
+                if 'most_used_hashtags' in hashtag_data and hashtag_data['most_used_hashtags']:
+                    output += "**Most Used Hashtags:**\n\n"
+                    for i, tag_info in enumerate(hashtag_data['most_used_hashtags'][:10], 1):
+                        output += f"{i}. {tag_info['hashtag']} ({tag_info['count']} times)\n"
+                    output += "\n"
+
+                if 'hashtag_count_vs_engagement' in hashtag_data:
+                    output += "**Hashtag Count vs Engagement:**\n\n"
+                    output += "| Number of Hashtags | Avg Engagement | Post Count |\n"
+                    output += "|-------------------|----------------|------------|\n"
+                    for count, metrics in sorted(hashtag_data['hashtag_count_vs_engagement'].items()):
+                        output += f"| {count} | {metrics['avg_engagement']:.2f}% | {metrics['post_count']} |\n"
+                    output += "\n"
+
+            # Performance Trends
+            if 'performance_trends' in platform_data:
+                trends = platform_data['performance_trends']
+                output += "#### 📈 Performance Trends Over Time\n\n"
+
+                if 'growth_metrics' in trends:
+                    growth = trends['growth_metrics']
+                    eng_change = growth.get('engagement_rate_change', 0)
+                    reach_change = growth.get('reach_change', 0)
+
+                    trend_icon = '📈' if eng_change > 0 else '📉'
+                    output += f"{trend_icon} **Engagement Trend:** {trends.get('trend', 'stable').title()}\n"
+                    output += f"- Engagement rate change: {eng_change:+.1f}%\n"
+                    output += f"- Reach change: {reach_change:+.1f}%\n\n"
+
+                if 'weekly_performance' in trends:
+                    output += "**Weekly Performance:**\n\n"
+                    output += "| Week | Posts | Avg Engagement | Total Interactions |\n"
+                    output += "|------|-------|----------------|--------------------|\n"
+                    for week, metrics in list(trends['weekly_performance'].items())[-4:]:
+                        output += f"| {week} | {metrics['posts']} | {metrics['avg_engagement']:.2f}% | {metrics['total_interactions']:,} |\n"
+                    output += "\n"
+
+            # Reels Patterns (if available)
+            if 'reels_posting_patterns' in platform_data:
+                reels_patterns = platform_data['reels_posting_patterns']
+                output += "#### 🎥 Reels Posting Patterns\n\n"
+
+                if 'posting_frequency' in reels_patterns:
+                    freq = reels_patterns['posting_frequency']
+                    output += f"- **Reels per week:** {freq.get('posts_per_week', 0):.1f}\n\n"
+
+            output += "\n"
 
         return output
 
