@@ -12,7 +12,7 @@ from tqdm import tqdm
 from config.config import (
     METRICOOL_USER_ID, CLIENT_NAME, START_DATE, END_DATE
 )
-from utils import make_api_request, save_json, get_date_range_params
+from utils import make_api_request, save_json, get_date_range_params, get_timeline_date_params
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -99,7 +99,7 @@ class MetricoolDataFetcher:
         """Fetch timeline analytics for Instagram and Facebook"""
         logger.info("Fetching timeline analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         # Define metrics for Instagram
         instagram_metrics = {
@@ -176,7 +176,7 @@ class MetricoolDataFetcher:
         """Fetch aggregated analytics for Instagram and Facebook"""
         logger.info("Fetching aggregation analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         # Define metrics for aggregation (total counts/sums for the period)
         aggregation_metrics = {

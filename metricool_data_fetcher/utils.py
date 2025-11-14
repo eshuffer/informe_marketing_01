@@ -84,6 +84,7 @@ def make_api_request(
             rate_limit_wait()
 
             logger.debug(f"Request to {endpoint} (attempt {attempt + 1}/{MAX_RETRIES})")
+            logger.debug(f"Full URL: {url} with params: {params}")
 
             if method.upper() == "GET":
                 response = requests.get(
@@ -199,4 +200,30 @@ def get_date_range_params(start_date: str, end_date: str) -> Dict[str, Any]:
     return {
         'start': start_int,
         'end': end_int
+    }
+
+
+def get_timeline_date_params(start_date: str, end_date: str) -> Dict[str, Any]:
+    """
+    Create date range parameters for timeline/aggregation endpoints
+    These endpoints use 'from' and 'to' with ISO 8601 format
+
+    Args:
+        start_date: Start date (YYYY-MM-DD)
+        end_date: End date (YYYY-MM-DD)
+
+    Returns:
+        Dictionary with date parameters in ISO 8601 format
+    """
+    # Convert to ISO 8601 datetime format (YYYY-MM-DDTHH:MM:SS)
+    start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+    end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+
+    # Format as ISO 8601 with time component
+    start_iso = start_dt.strftime('%Y-%m-%dT00:00:00')
+    end_iso = end_dt.strftime('%Y-%m-%dT23:59:59')
+
+    return {
+        'from': start_iso,
+        'to': end_iso
     }
