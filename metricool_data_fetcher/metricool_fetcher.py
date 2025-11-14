@@ -85,86 +85,46 @@ class MetricoolDataFetcher:
         return None
 
     def detect_connected_platforms(self):
-        """Detect which platforms are connected to this brand"""
-        logger.info("Detecting connected platforms...")
+        """Show which platforms are enabled in configuration"""
+        logger.info("Checking platform configuration...")
 
-        # Get connected profiles
-        response = make_api_request('/admin/blog/profiles', blog_id=self.blog_id)
-
-        if not response:
-            logger.warning("Could not detect connected platforms")
-            return
-
-        # Parse response
-        profiles = response if isinstance(response, list) else response.get('data', [])
-
-        # Platform mapping (API field name -> platform name)
-        platform_map = {
-            'instagram': 'instagram',
-            'facebook': 'facebook',
-            'linkedin': 'linkedin',
-            'twitter': 'twitter',
-            'twitterConnection': 'twitter',
-            'tiktok': 'tiktok',
-            'youtube': 'youtube',
-            'pinterest': 'pinterest',
-            'threads': 'threads',
-            'bluesky': 'bluesky',
-        }
-
-        # Detect connected platforms from profiles
-        connected = set()
-        for profile in profiles:
-            for api_field, platform_name in platform_map.items():
-                # Check if field exists and is not null/empty
-                if profile.get(api_field):
-                    connected.add(platform_name)
-
-        self.connected_platforms = sorted(list(connected))
-
-        # Determine enabled platforms (connected AND enabled in config)
+        # Use platforms enabled in config
+        # Note: Auto-detection via API is unreliable, so we use config directly
         self.enabled_platforms = [
-            p for p in self.connected_platforms
-            if PLATFORMS_ENABLED.get(p, False)
+            platform for platform, enabled in PLATFORMS_ENABLED.items()
+            if enabled
         ]
 
         # Print platform status
         print("\n" + "="*80)
-        print("PLATFORM AVAILABILITY FOR SATTVICA")
+        print("PLATFORM CONFIGURATION FOR SATTVICA")
         print("="*80)
 
-        if self.connected_platforms:
-            print("\n✅ CONNECTED PLATFORMS:")
-            for platform in self.connected_platforms:
-                enabled = PLATFORMS_ENABLED.get(platform, False)
-                status = "✓ ENABLED" if enabled else "✗ DISABLED IN CONFIG"
-                print(f"   • {platform.upper():15} - {status}")
-        else:
-            print("\n⚠️  No connected platforms detected")
-
-        # Show disabled platforms in config
-        disabled_in_config = [p for p, enabled in PLATFORMS_ENABLED.items() if not enabled]
-        if disabled_in_config:
-            print("\n⚠️  DISABLED IN CONFIG (will skip even if connected):")
-            for platform in disabled_in_config:
-                print(f"   • {platform.upper()}")
-
-        print("\n💡 PLATFORMS THAT WILL BE FETCHED:")
-        if self.enabled_platforms:
-            for platform in self.enabled_platforms:
+        # Show enabled platforms
+        enabled_platforms = [p for p, e in PLATFORMS_ENABLED.items() if e]
+        if enabled_platforms:
+            print("\n✅ ENABLED PLATFORMS (will be fetched):")
+            for platform in enabled_platforms:
                 print(f"   • {platform.upper()}")
         else:
-            print("   None (all platforms disabled or not connected)")
+            print("\n⚠️  No platforms enabled in configuration")
+
+        # Show disabled platforms
+        disabled_platforms = [p for p, e in PLATFORMS_ENABLED.items() if not e]
+        if disabled_platforms:
+            print("\n⚠️  DISABLED PLATFORMS (will be skipped):")
+            for platform in disabled_platforms:
+                print(f"   • {platform.upper()}")
 
         print("\n📝 To enable/disable platforms, edit: config/config.py -> PLATFORMS_ENABLED")
         print("="*80 + "\n")
 
-        # Save platform detection results
+        # Save platform configuration
         platform_status = {
-            'connected': self.connected_platforms,
-            'enabled_in_config': [p for p, e in PLATFORMS_ENABLED.items() if e],
+            'enabled_in_config': enabled_platforms,
+            'disabled_in_config': disabled_platforms,
             'will_fetch': self.enabled_platforms,
-            'detection_time': datetime.now().isoformat()
+            'config_check_time': datetime.now().isoformat()
         }
         save_json(
             platform_status,
