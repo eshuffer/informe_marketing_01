@@ -1,0 +1,218 @@
+{
+  "data": [
+    {
+      "id": 3847470,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "VAOVA",
+      "title": "Vaova",
+      "description": "Negocios Brillantes",
+      "image": "https://static.metricool.com/brand-logo/202409/3847470-temp-file9918732049506487762.com-brand-facebook-page-image",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "6b61056508e01db1bb402aa05d1cb25",
+      "joinDate": {
+        "dateTime": "2024-07-17T22:11:21",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2024-07-17T22:15:10",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 1000,
+      "networksData": {
+        "webData": "https://vaova.cl",
+        "facebookData": "1073007959555582",
+        "instagramData": "vaova.cl",
+        "facebookAdsData": "act_729638414137408"
+      },
+      "isShared": false
+    },
+    {
+      "id": 3991897,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "Sattvica",
+      "description": "",
+      "image": "https://static.metricool.com/brand-logo/202409/3991897-temp-file6591048585504464273.com-brand-facebook-page-image",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "393de6b129190a15dc94ee4916f51d9",
+      "joinDate": {
+        "dateTime": "2024-09-03T21:50:54",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2024-09-03T22:08:57",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 1000,
+      "networksData": {
+        "facebookData": "2144917312438196",
+        "instagramData": "sattvica_integrativa",
+        "facebookAdsData": "act_803824194622560"
+      },
+      "isShared": false
+    },
+    {
+      "id": 3995195,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "ICONTEC Chile",
+      "description": "",
+      "image": "https://static.metricool.com/brand-logo/202409/3995195-temp-file1837908528549476197.com-brand-facebook-page-image",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "bd177ec6ff6b2c18777bc8d67cdcb5c9",
+      "joinDate": {
+        "dateTime": "2024-09-04T19:24:23",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2024-09-04T19:24:35",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 1000,
+      "networksData": {
+        "facebookData": "114807174975937",
+        "instagramData": "icontec.chile",
+        "facebookAdsData": "act_951114659647232"
+      },
+      "isShared": false
+    },
+    {
+      "id": 3995196,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "Ainwater",
+      "description": "",
+      "image": "https://static.metricool.com/brand-logo/202409/3995196-temp-file7530915714310503183.png",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "722e1526d590022f072dcbd5f31ed84c",
+      "joinDate": {
+        "dateTime": "2024-09-04T19:25:01",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2024-09-04T19:25:08",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 1000,
+      "networksData": {},
+      "isShared": false
+    },
+    {
+      "id": 3995211,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "Mayro",
+      "description": "",
+      "image": "https://static.metricool.com/brand-logo/202409/3995211-temp-file17346353927016052154.png",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "b6abd70a28963d899100eec2c68e7873",
+      "joinDate": {
+        "dateTime": "2024-09-04T19:29:48",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2024-09-04T19:29:55",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 1000,
+      "networksData": {},
+      "isShared": false
+    },
+    {
+      "id": 4147753,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "Ortomolecular chile",
+      "description": "",
+      "image": "https://static.metricool.com/brand-logo/202410/4147753-temp-file756309694428461756.jpeg",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "f7702868f3ff80f93509a36c7b4aa69a",
+      "joinDate": {
+        "dateTime": "2024-10-22T17:20:43",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2024-10-22T17:26:03",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 100,
+      "networksData": {
+        "facebookData": "378531785657026",
+        "instagramData": "ortomolecular_chile",
+        "linkedinData": "urn:li:organization:68582616"
+      },
+      "isShared": false
+    },
+    {
+      "id": 4338723,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "description": "",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "924dcebcd8077c58a7708b673d25d8af",
+      "joinDate": {
+        "dateTime": "2024-12-26T19:11:59",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 100,
+      "networksData": {},
+      "isShared": false
+    },
+    {
+      "id": 4371254,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "ayurdharma",
+      "description": "",
+      "image": "https://static.metricool.com/resources/img/blank-profile-picture.png",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "c7a899c4731fb97637d5d0e5c004da5e",
+      "joinDate": {
+        "dateTime": "2025-01-08T21:26:02",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2025-01-08T21:27:33",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 100,
+      "networksData": {
+        "facebookData": "1787557421564624",
+        "instagramData": "somaintegra",
+        "facebookAdsData": "act_305516532082186"
+      },
+      "isShared": false
+    },
+    {
+      "id": 4704450,
+      "userId": 3028322,
+      "ownerUserId": 3028322,
+      "label": "Academia Nut Fem",
+      "description": "",
+      "image": "https://static.metricool.com/brand/facebook-page-image?brandId=4704450&v=61c53a0a2b76dd18eb8e231f581477bb",
+      "ownerUsername": "claugomez@vaova.cl",
+      "hash": "a393e9e9d974f885496a4520bdeb5967",
+      "joinDate": {
+        "dateTime": "2025-04-15T17:00:55",
+        "timezone": "Europe/Madrid"
+      },
+      "firstConnectionDate": {
+        "dateTime": "2025-04-15T17:01:27",
+        "timezone": "Europe/Madrid"
+      },
+      "timezone": "America/Santiago",
+      "engagementRatio": 100,
+      "networksData": {},
+      "isShared": false
+    }
+  ]
+}

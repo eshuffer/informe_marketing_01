@@ -1,0 +1,107 @@
+[
+  {
+    "gender": "F",
+    "age": "35-44",
+    "value": 2194.0
+  },
+  {
+    "gender": "F",
+    "age": "45-54",
+    "value": 1349.0
+  },
+  {
+    "gender": "F",
+    "age": "25-34",
+    "value": 1037.0
+  },
+  {
+    "gender": "F",
+    "age": "55-64",
+    "value": 545.0
+  },
+  {
+    "gender": "U",
+    "age": "35-44",
+    "value": 304.0
+  },
+  {
+    "gender": "M",
+    "age": "35-44",
+    "value": 223.0
+  },
+  {
+    "gender": "U",
+    "age": "25-34",
+    "value": 223.0
+  },
+  {
+    "gender": "U",
+    "age": "45-54",
+    "value": 182.0
+  },
+  {
+    "gender": "M",
+    "age": "25-34",
+    "value": 152.0
+  },
+  {
+    "gender": "F",
+    "age": "65+",
+    "value": 137.0
+  },
+  {
+    "gender": "M",
+    "age": "45-54",
+    "value": 93.0
+  },
+  {
+    "gender": "U",
+    "age": "55-64",
+    "value": 84.0
+  },
+  {
+    "gender": "U",
+    "age": "65+",
+    "value": 42.0
+  },
+  {
+    "gender": "F",
+    "age": "18-24",
+    "value": 41.0
+  },
+  {
+    "gender": "M",
+    "age": "55-64",
+    "value": 34.0
+  },
+  {
+    "gender": "U",
+    "age": "18-24",
+    "value": 22.0
+  },
+  {
+    "gender": "M",
+    "age": "65+",
+    "value": 9.0
+  },
+  {
+    "gender": "M",
+    "age": "18-24",
+    "value": 8.0
+  },
+  {
+    "gender": "U",
+    "age": "13-17",
+    "value": 2.0
+  },
+  {
+    "gender": "F",
+    "age": "13-17",
+    "value": 1.0
+  },
+  {
+    "gender": "M",
+    "age": "13-17",
+    "value": 1.0
+  }
+]

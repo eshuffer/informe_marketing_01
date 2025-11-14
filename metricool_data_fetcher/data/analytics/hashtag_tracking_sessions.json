@@ -1,0 +1,189 @@
+{
+  "data": [
+    {
+      "id": 7581,
+      "hash": "CXVCDCLEJSAZKTCZSYPKDXSTYJUASOLD",
+      "start": {
+        "dateTime": "2020-02-28T05:00:00",
+        "timezone": "America/Santiago"
+      },
+      "end": {
+        "dateTime": "2020-03-05T05:00:00",
+        "timezone": "America/Santiago"
+      },
+      "createdAt": {
+        "dateTime": "2020-03-03T20:27:13",
+        "timezone": "America/Santiago"
+      },
+      "consolidatedDateTime": {
+        "dateTime": "2020-03-05T05:25:00",
+        "timezone": "America/Santiago"
+      },
+      "consolidated": true,
+      "scanned": true,
+      "duration": 6,
+      "query": "#SMMW20 OR #SMMW2020 OR #SMMW OR @SMExaminer",
+      "tweetsCount": 21559,
+      "igPostsCount": 0,
+      "logo": "null",
+      "enabledNetworks": [
+        "twitter"
+      ],
+      "manualConsolidationTodayCounter": 0
+    },
+    {
+      "id": 6125,
+      "hash": "ISHYVSLWXZHJOVMPCCDEKDJEVAOLEKYK",
+      "start": {
+        "dateTime": "2019-09-03T18:00:00",
+        "timezone": "America/Santiago"
+      },
+      "end": {
+        "dateTime": "2019-09-06T18:00:00",
+        "timezone": "America/Santiago"
+      },
+      "createdAt": {
+        "dateTime": "2019-09-04T02:17:03",
+        "timezone": "America/Santiago"
+      },
+      "consolidatedDateTime": {
+        "dateTime": "2019-09-06T18:55:00",
+        "timezone": "America/Santiago"
+      },
+      "consolidated": true,
+      "scanned": true,
+      "duration": 3,
+      "query": "#inbound19 OR #inbound2019 ",
+      "tweetsCount": 19503,
+      "igPostsCount": 3136,
+      "logo": "null",
+      "enabledNetworks": [
+        "instagram",
+        "twitter"
+      ],
+      "manualConsolidationTodayCounter": 0
+    },
+    {
+      "id": 4649,
+      "hash": "KOUGDXTZGTHJNAMTVZFFZCRDFBDHBVBW",
+      "start": {
+        "dateTime": "2019-03-19T20:00:00",
+        "timezone": "America/Santiago"
+      },
+      "end": {
+        "dateTime": "2019-03-23T20:00:00",
+        "timezone": "America/Santiago"
+      },
+      "createdAt": {
+        "dateTime": "2019-03-20T05:39:19",
+        "timezone": "America/Santiago"
+      },
+      "consolidatedDateTime": {
+        "dateTime": "2019-03-23T20:22:00",
+        "timezone": "America/Santiago"
+      },
+      "consolidated": true,
+      "scanned": true,
+      "duration": 4,
+      "query": "#SMMW19 OR #SMMW2019 OR #SMMW OR @SMExaminer",
+      "tweetsCount": 25607,
+      "igPostsCount": 3539,
+      "logo": "https://static.metricool.com/common/202508/4902461-mtr_12804998194394524356.jpg",
+      "enabledNetworks": [
+        "instagram",
+        "twitter"
+      ],
+      "manualConsolidationTodayCounter": 0
+    },
+    {
+      "id": 2267,
+      "hash": "DPKITKMKKXXYZOLWSJDXLHSUFJZNMXPU",
+      "start": {
+        "dateTime": "2018-09-03T19:00:00",
+        "timezone": "America/Santiago"
+      },
+      "end": {
+        "dateTime": "2018-09-07T19:00:00",
+        "timezone": "America/Santiago"
+      },
+      "createdAt": {
+        "dateTime": "2018-09-04T09:26:45",
+        "timezone": "America/Santiago"
+      },
+      "consolidatedDateTime": {
+        "dateTime": "2018-09-07T19:55:00",
+        "timezone": "America/Santiago"
+      },
+      "consolidated": true,
+      "scanned": true,
+      "duration": 4,
+      "query": "#INBOUND18",
+      "tweetsCount": 31928,
+      "logo": "null",
+      "enabledNetworks": [
+        "twitter"
+      ],
+      "manualConsolidationTodayCounter": 0
+    },
+    {
+      "id": 2007,
+      "hash": "VNNOVZUKNJHRNSXFRDMLISBWNKWHZZAJ",
+      "start": {
+        "dateTime": "2018-06-17T18:00:00",
+        "timezone": "America/Santiago"
+      },
+      "end": {
+        "dateTime": "2018-06-22T18:00:00",
+        "timezone": "America/Santiago"
+      },
+      "createdAt": {
+        "dateTime": "2018-06-18T08:34:44",
+        "timezone": "America/Santiago"
+      },
+      "consolidatedDateTime": {
+        "dateTime": "2018-06-22T18:41:00",
+        "timezone": "America/Santiago"
+      },
+      "consolidated": true,
+      "scanned": true,
+      "duration": 5,
+      "query": "#CannesLions",
+      "tweetsCount": 91599,
+      "logo": "https://static.metricool.com/common/202505/3952371-mtr_3592616864523480861.png",
+      "enabledNetworks": [
+        "twitter"
+      ],
+      "manualConsolidationTodayCounter": 0
+    },
+    {
+      "id": 1129,
+      "hash": "NMKNCPJCVGXGLNIRQRSOZHHABLSJZZCY",
+      "start": {
+        "dateTime": "2018-02-28T05:00:00",
+        "timezone": "America/Santiago"
+      },
+      "end": {
+        "dateTime": "2018-03-04T05:00:00",
+        "timezone": "America/Santiago"
+      },
+      "createdAt": {
+        "dateTime": "2018-02-28T15:05:25",
+        "timezone": "America/Santiago"
+      },
+      "consolidatedDateTime": {
+        "dateTime": "2018-03-04T05:29:04",
+        "timezone": "America/Santiago"
+      },
+      "consolidated": true,
+      "scanned": true,
+      "duration": 3,
+      "query": "#SMMW18 OR #SMMW2018 OR @SMExaminer",
+      "tweetsCount": 32452,
+      "logo": "",
+      "enabledNetworks": [
+        "twitter"
+      ],
+      "manualConsolidationTodayCounter": 0
+    }
+  ]
+}
