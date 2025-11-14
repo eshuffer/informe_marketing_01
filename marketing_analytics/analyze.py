@@ -20,6 +20,7 @@ from analytics_processors import (
 )
 from enhanced_analytics import EnhancedContentAnalyzer
 from ai_insights import AIInsightGenerator
+from topic_based_insights import TopicBasedInsightsGenerator
 from report_generator import MarkdownReportGenerator
 from config import BRAND_NAME, ENABLED_PLATFORMS, REPORTS_DIR
 
@@ -47,6 +48,7 @@ class MarketingAnalytics:
         self.content_analyzer = ContentPerformanceAnalyzer()
         self.enhanced_analyzer = EnhancedContentAnalyzer()
         self.ai_generator = AIInsightGenerator()
+        self.topic_insights_generator = TopicBasedInsightsGenerator()
         self.report_generator = MarkdownReportGenerator()
 
         self.raw_data = {}
@@ -298,22 +300,36 @@ class MarketingAnalytics:
         self.analytics_results['platform_comparison'] = comparison
 
     def generate_ai_insights(self):
-        """Generate AI-powered insights"""
-        insights = {}
-
-        # Generate comprehensive insights
-        comprehensive = self.ai_generator.generate_comprehensive_insights(
+        """Generate AI-powered insights using topic-based analysis"""
+        # Use topic-based insights generator for deeper, focused analysis
+        topic_insights = self.topic_insights_generator.generate_all_topic_insights(
             self.analytics_results
         )
-        insights.update(comprehensive)
 
-        # Generate executive summary
-        exec_summary = self.ai_generator.generate_executive_summary(
-            self.analytics_results
-        )
-        insights['executive_summary'] = exec_summary
+        # Format for report generator compatibility
+        insights = {
+            'status': topic_insights.get('status', 'error'),
+            'executive_summary': topic_insights.get('executive_summary', ''),
+            'insights': self._format_topic_insights_for_report(topic_insights),
+            'strategic_recommendations': topic_insights.get('strategic_recommendations', ''),
+            'topics': topic_insights.get('topics', {}),
+            'tokens': topic_insights.get('total_tokens', {}),
+            'cost_estimate': topic_insights.get('total_cost_estimate', 0)
+        }
 
         return insights
+
+    def _format_topic_insights_for_report(self, topic_insights: Dict[str, Any]) -> str:
+        """Format topic insights into a single text for backward compatibility"""
+        if 'topics' not in topic_insights:
+            return "No insights generated"
+
+        formatted_parts = []
+
+        for topic_id, topic_data in topic_insights['topics'].items():
+            formatted_parts.append(f"## {topic_data['name']}\n\n{topic_data['insights']}\n")
+
+        return "\n---\n\n".join(formatted_parts)
 
 
 def main():
