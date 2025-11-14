@@ -86,7 +86,6 @@ class MetricoolDataFetcher:
         endpoints = [
             ('/admin/blog/profiles', 'connected_profiles.json'),
             ('/profile/subscription', 'subscription.json'),
-            ('/profile/timezone', 'timezone.json'),
             ('/v2/settings/brands', 'brand_settings.json'),
         ]
 
