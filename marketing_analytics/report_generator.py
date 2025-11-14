@@ -52,6 +52,9 @@ class MarkdownReportGenerator:
             # Content Performance
             f.write(self._generate_content_performance(analytics_data))
 
+            # Top Performers vs Average
+            f.write(self._generate_top_performers(analytics_data))
+
             # Enhanced Content Insights
             f.write(self._generate_enhanced_insights(analytics_data))
 
@@ -122,14 +125,15 @@ class MarkdownReportGenerator:
 3. [Platform Performance](#platform-performance-comparison)
 4. [Engagement Analysis](#engagement-analysis)
 5. [Content Performance](#content-performance)
-6. [Detailed Content Insights](#detailed-content-insights)
-7. [Trends Analysis](#trends-analysis)
-8. [Audience Demographics](#audience-demographics)
-9. [Best Posting Times](#optimal-posting-times)
-10. [AI Strategic Insights](#ai-powered-strategic-insights)
-11. [AI Strategic Action Plan](#ai-strategic-action-plan)
-12. [Recommendations](#recommendations)
-13. [Appendix](#appendix)
+6. [Top Performers vs Average](#top-performers-vs-average)
+7. [Detailed Content Insights](#detailed-content-insights)
+8. [Trends Analysis](#trends-analysis)
+9. [Audience Demographics](#audience-demographics)
+10. [Best Posting Times](#optimal-posting-times)
+11. [AI Strategic Insights](#ai-powered-strategic-insights)
+12. [AI Strategic Action Plan](#ai-strategic-action-plan)
+13. [Recommendations](#recommendations)
+14. [Appendix](#appendix)
 
 ---
 
@@ -254,6 +258,156 @@ class MarkdownReportGenerator:
                         if 'preview' in post:
                             output += f"   *{post['preview']}*\n"
                         output += "\n"
+
+        return output
+
+    def _generate_top_performers(self, data: Dict[str, Any]) -> str:
+        """Generate top performers vs average comparison section"""
+        output = "\n---\n\n## 🏅 Top Performers vs Average\n\n"
+        output += "*Detailed comparison of best-performing content against period averages*\n\n"
+
+        engagement = data.get('engagement', {})
+        content_perf = data.get('content_performance', {})
+
+        # Extract averages from content type comparison
+        content_type_comp = content_perf.get('content_type_comparison', {})
+        posts_avg_engagement = content_type_comp.get('posts', {}).get('avg_engagement', 0)
+        posts_avg_reach = content_type_comp.get('posts', {}).get('avg_reach', 0)
+        reels_avg_engagement = content_type_comp.get('reels', {}).get('avg_engagement', 0)
+        reels_avg_reach = content_type_comp.get('reels', {}).get('avg_reach', 0)
+
+        # Get top content from content_performance
+        top_content = content_perf.get('top_content', {})
+
+        # Process each platform
+        for platform, top_posts in top_content.items():
+            if not top_posts or len(top_posts) == 0:
+                continue
+
+            output += f"### {platform.title()}\n\n"
+
+            # Separate posts and reels based on platform naming or type
+            # Assuming platform names like "Instagram_Posts" and "Instagram_Reels"
+            is_posts = 'posts' in platform.lower() or 'post' in platform.lower()
+            is_reels = 'reels' in platform.lower() or 'reel' in platform.lower()
+
+            # Get engagement data for this platform to calculate total interactions average
+            platform_eng = engagement.get(platform, {})
+            avg_interactions = 0
+            if 'total_interactions' in platform_eng and 'total_posts' in platform_eng:
+                if platform_eng['total_posts'] > 0:
+                    avg_interactions = platform_eng['total_interactions'] / platform_eng['total_posts']
+
+            # Determine which averages to use
+            if is_posts:
+                comparison_avg_engagement = posts_avg_engagement
+                comparison_avg_reach = posts_avg_reach
+                content_type_name = "Posts"
+            elif is_reels:
+                comparison_avg_engagement = reels_avg_engagement
+                comparison_avg_reach = reels_avg_reach
+                content_type_name = "Reels"
+            else:
+                # Use platform-specific averages if available
+                comparison_avg_engagement = platform_eng.get('avg_engagement_rate', 0)
+                comparison_avg_reach = platform_eng.get('total_reach', 0) / platform_eng.get('total_posts', 1) if platform_eng.get('total_posts', 0) > 0 else 0
+                content_type_name = "Content"
+
+            # Show top 3
+            output += f"#### 🥇 Top 3 {content_type_name}\n\n"
+            output += "| Rank | Engagement Rate | Reach | Interactions | vs Avg Engagement | vs Avg Reach | Link |\n"
+            output += "|------|----------------|-------|--------------|-------------------|-------------|------|\n"
+
+            for i, post in enumerate(top_posts[:3], 1):
+                eng_rate = post.get('metric_value', 0)
+                reach = post.get('reach', 0) if isinstance(post.get('reach'), (int, float)) else 0
+                interactions = post.get('interactions', 0) if isinstance(post.get('interactions'), (int, float)) else 0
+
+                # Calculate differences
+                eng_diff = ((eng_rate - comparison_avg_engagement) / comparison_avg_engagement * 100) if comparison_avg_engagement > 0 else 0
+                reach_diff = ((reach - comparison_avg_reach) / comparison_avg_reach * 100) if comparison_avg_reach > 0 else 0
+
+                # Format differences with + or -
+                eng_diff_str = f"+{eng_diff:.1f}%" if eng_diff >= 0 else f"{eng_diff:.1f}%"
+                reach_diff_str = f"+{reach_diff:.1f}%" if reach_diff >= 0 else f"{reach_diff:.1f}%"
+
+                # Medal emojis
+                medal = "🥇" if i == 1 else ("🥈" if i == 2 else "🥉")
+
+                # Create anchor ID for this post
+                anchor_id = f"post-{platform.lower().replace('_', '-')}-{i}"
+
+                # Create link - use external URL if available, otherwise link to detail section
+                if 'url' in post and post['url'] != 'N/A':
+                    link_text = "[🔗 View]"
+                    link_url = post['url']
+                    link_md = f"[🔗]({link_url})"
+                elif 'shortcode' in post and 'instagram' in platform.lower():
+                    # Construct Instagram URL from shortcode
+                    link_md = f"[🔗](https://www.instagram.com/p/{post['shortcode']}/)"
+                else:
+                    # Link to detail section within report
+                    link_md = f"[📝](#{anchor_id})"
+
+                output += f"| {medal} #{i} | {eng_rate:.2f}% | {reach:,} | {interactions:,} | {eng_diff_str} | {reach_diff_str} | {link_md} |\n"
+
+            output += "\n"
+
+            # Show detailed information for top 3
+            has_content = any('preview' in post or 'full_text' in post for post in top_posts[:3])
+            if has_content:
+                output += "**📋 Detailed Content Information:**\n\n"
+                for i, post in enumerate(top_posts[:3], 1):
+                    medal = "🥇" if i == 1 else ("🥈" if i == 2 else "🥉")
+                    anchor_id = f"post-{platform.lower().replace('_', '-')}-{i}"
+
+                    # Add anchor for internal linking
+                    output += f'<a id="{anchor_id}"></a>\n\n'
+                    output += f"{medal} **Post #{i}**\n\n"
+
+                    # Add date if available
+                    if 'date' in post:
+                        output += f"- **Posted:** {post['date']}\n"
+
+                    # Add metrics
+                    eng_rate = post.get('metric_value', 0)
+                    reach = post.get('reach', 'N/A')
+                    interactions = post.get('interactions', 'N/A')
+                    output += f"- **Performance:** {eng_rate:.2f}% engagement | {reach:,} reach | {interactions:,} interactions\n" if isinstance(reach, (int, float)) and isinstance(interactions, (int, float)) else f"- **Performance:** {eng_rate:.2f}% engagement\n"
+
+                    # Add link if available
+                    if 'url' in post and post['url'] != 'N/A':
+                        output += f"- **Link:** [View Post]({post['url']})\n"
+                    elif 'shortcode' in post and 'instagram' in platform.lower():
+                        ig_url = f"https://www.instagram.com/p/{post['shortcode']}/"
+                        output += f"- **Link:** [View on Instagram]({ig_url})\n"
+
+                    # Add content
+                    if 'full_text' in post:
+                        output += f"\n**Content:**\n\n> {post['full_text'][:500]}\n\n"
+                    elif 'preview' in post:
+                        output += f"\n**Preview:**\n\n> {post['preview']}\n\n"
+
+                    output += "---\n\n"
+
+            # Add period averages for reference
+            output += f"**Period Averages for {content_type_name}:**\n"
+            output += f"- Average Engagement Rate: {comparison_avg_engagement:.2f}%\n"
+            output += f"- Average Reach: {comparison_avg_reach:,.0f}\n"
+            if avg_interactions > 0:
+                output += f"- Average Interactions: {avg_interactions:,.0f}\n"
+            output += "\n"
+
+            # Add key insights
+            if len(top_posts) >= 3:
+                top_3_avg_eng = sum(post.get('metric_value', 0) for post in top_posts[:3]) / 3
+                performance_multiplier = top_3_avg_eng / comparison_avg_engagement if comparison_avg_engagement > 0 else 0
+
+                output += f"**Key Insight:** Top 3 {content_type_name.lower()} average {top_3_avg_eng:.2f}% engagement, "
+                output += f"performing **{performance_multiplier:.1f}x** better than the period average.\n\n"
+
+        if not top_content:
+            output += "*No top performer data available for this period.*\n\n"
 
         return output
 

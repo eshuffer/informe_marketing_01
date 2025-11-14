@@ -263,7 +263,7 @@ class ContentPerformanceAnalyzer:
         top_posts = posts_df.nlargest(top_n, metric)
 
         results = []
-        for _, post in top_posts.iterrows():
+        for idx, post in top_posts.iterrows():
             result = {
                 'metric_value': post[metric],
                 'reach': post.get('reach', 'N/A'),
@@ -272,11 +272,30 @@ class ContentPerformanceAnalyzer:
                 'comments': post.get('comments', 'N/A'),
             }
 
+            # Add post ID/permalink/URL if available
+            id_fields = ['id', 'postId', 'post_id', 'shortcode', 'permalink', 'url', 'link']
+            for field in id_fields:
+                if field in post and pd.notna(post[field]):
+                    result['post_id'] = str(post[field])
+                    break
+
+            # Add shortcode if available (for Instagram URL construction)
+            if 'shortcode' in post and pd.notna(post['shortcode']):
+                result['shortcode'] = str(post['shortcode'])
+
+            # Add permalink/URL if available
+            url_fields = ['permalink', 'url', 'link', 'postUrl']
+            for field in url_fields:
+                if field in post and pd.notna(post[field]):
+                    result['url'] = str(post[field])
+                    break
+
             # Add text preview if available
             text_fields = ['text', 'caption', 'description', 'message']
             for field in text_fields:
                 if field in post and pd.notna(post[field]):
                     result['preview'] = str(post[field])[:150] + '...'
+                    result['full_text'] = str(post[field])  # Keep full text for detailed view
                     break
 
             # Add date if available
