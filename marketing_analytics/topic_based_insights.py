@@ -30,7 +30,11 @@ class TopicBasedInsightsGenerator:
         else:
             self.client = OpenAI(api_key=api_key)
 
-        # Define topic groups
+        # Define analysis phases and topics
+        self.enable_data_consolidation = True  # Phase 1: Data consolidation
+        self.enable_validation = True  # Phase 4: Validation
+
+        # Define topic groups (Phase 2)
         self.topics = {
             'engagement_performance': {
                 'name': 'Engagement & Performance Analysis',
@@ -60,27 +64,52 @@ class TopicBasedInsightsGenerator:
         }
 
     def generate_all_topic_insights(self, analytics_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate insights for all topics"""
+        """Generate insights for all topics using 12-request enhanced architecture"""
         if not self.client:
             return {
                 'error': 'OpenAI API key not configured',
                 'message': 'Set OPENAI_API_KEY environment variable to enable AI insights'
             }
 
-        logger.info("Generating topic-based AI insights...")
+        logger.info("Generating enhanced AI insights (12-request architecture)...")
 
         all_insights = {
             'topics': {},
             'executive_summary': '',
             'strategic_recommendations': '',
-            'status': 'success'
+            'status': 'success',
+            'data_consolidation': {},
+            'validation': {}
         }
 
         total_tokens = {'prompt': 0, 'completion': 0}
 
-        # Generate insights for each topic
+        # === PHASE 1: DATA CONSOLIDATION (2 requests) ===
+        logger.info("\n[Phase 1/4] Data Consolidation")
+
+        if self.enable_data_consolidation:
+            # Request 1: Data Synthesis & Key Metrics Extraction
+            logger.info("  [1/12] Extracting key metrics dictionary...")
+            metrics_dict = self._generate_metrics_dictionary(analytics_data)
+            if metrics_dict.get('status') == 'success':
+                all_insights['data_consolidation']['metrics_dictionary'] = metrics_dict['content']
+                total_tokens['prompt'] += metrics_dict.get('tokens', {}).get('prompt', 0)
+                total_tokens['completion'] += metrics_dict.get('tokens', {}).get('completion', 0)
+
+            # Request 2: Cross-Metric Pattern Detection
+            logger.info("  [2/12] Detecting cross-metric patterns...")
+            patterns = self._detect_cross_metric_patterns(analytics_data, metrics_dict.get('content', ''))
+            if patterns.get('status') == 'success':
+                all_insights['data_consolidation']['patterns'] = patterns['content']
+                total_tokens['prompt'] += patterns.get('tokens', {}).get('prompt', 0)
+                total_tokens['completion'] += patterns.get('tokens', {}).get('completion', 0)
+
+        # === PHASE 2: TOPIC ANALYSIS (5 requests) ===
+        logger.info("\n[Phase 2/4] Topic-Based Analysis")
+
+        request_num = 3
         for topic_id, topic_config in self.topics.items():
-            logger.info(f"  Analyzing: {topic_config['name']}")
+            logger.info(f"  [{request_num}/12] Analyzing: {topic_config['name']}")
 
             topic_data = self._extract_topic_data(analytics_data, topic_config['data_keys'])
 
@@ -89,7 +118,9 @@ class TopicBasedInsightsGenerator:
                     topic_id,
                     topic_config['name'],
                     topic_config['description'],
-                    topic_data
+                    topic_data,
+                    metrics_dict=all_insights['data_consolidation'].get('metrics_dictionary', ''),
+                    patterns=all_insights['data_consolidation'].get('patterns', '')
                 )
 
                 if insights.get('status') == 'success':
@@ -101,27 +132,67 @@ class TopicBasedInsightsGenerator:
                     total_tokens['prompt'] += insights.get('tokens', {}).get('prompt', 0)
                     total_tokens['completion'] += insights.get('tokens', {}).get('completion', 0)
 
-        # Generate executive summary based on all topic insights
+            request_num += 1
+
+        # === PHASE 3: SYNTHESIS (2 requests) ===
+        logger.info("\n[Phase 3/4] Executive Synthesis")
+
         if all_insights['topics']:
-            logger.info("  Generating executive summary...")
+            # Request 8: Executive Summary
+            logger.info("  [8/12] Generating executive summary...")
             exec_summary = self._generate_executive_summary(all_insights['topics'], analytics_data)
             if exec_summary.get('status') == 'success':
                 all_insights['executive_summary'] = exec_summary['content']
                 total_tokens['prompt'] += exec_summary.get('tokens', {}).get('prompt', 0)
                 total_tokens['completion'] += exec_summary.get('tokens', {}).get('completion', 0)
 
-            # Generate strategic recommendations
-            logger.info("  Generating strategic recommendations...")
+            # Request 9: Strategic Action Plan
+            logger.info("  [9/12] Generating strategic action plan...")
             recommendations = self._generate_strategic_recommendations(all_insights['topics'], analytics_data)
             if recommendations.get('status') == 'success':
                 all_insights['strategic_recommendations'] = recommendations['content']
                 total_tokens['prompt'] += recommendations.get('tokens', {}).get('prompt', 0)
                 total_tokens['completion'] += recommendations.get('tokens', {}).get('completion', 0)
 
+        # === PHASE 4: VALIDATION (3 requests) ===
+        logger.info("\n[Phase 4/4] Quality Validation")
+
+        if self.enable_validation:
+            # Request 10: Data Citation Validation
+            logger.info("  [10/12] Validating data citations...")
+            citation_check = self._validate_data_citations(
+                all_insights['strategic_recommendations'],
+                all_insights['data_consolidation'].get('metrics_dictionary', '')
+            )
+            if citation_check.get('status') == 'success':
+                all_insights['validation']['citation_validation'] = citation_check['content']
+                total_tokens['prompt'] += citation_check.get('tokens', {}).get('prompt', 0)
+                total_tokens['completion'] += citation_check.get('tokens', {}).get('completion', 0)
+
+            # Request 11: Research Source Quality Review
+            logger.info("  [11/12] Reviewing research source quality...")
+            source_review = self._review_research_sources(all_insights['strategic_recommendations'])
+            if source_review.get('status') == 'success':
+                all_insights['validation']['source_quality'] = source_review['content']
+                total_tokens['prompt'] += source_review.get('tokens', {}).get('prompt', 0)
+                total_tokens['completion'] += source_review.get('tokens', {}).get('completion', 0)
+
+            # Request 12: Final Enhancement & Integration
+            logger.info("  [12/12] Final enhancement & integration...")
+            final_enhanced = self._enhance_recommendations(
+                all_insights['strategic_recommendations'],
+                citation_check.get('content', ''),
+                source_review.get('content', '')
+            )
+            if final_enhanced.get('status') == 'success':
+                all_insights['strategic_recommendations'] = final_enhanced['content']
+                total_tokens['prompt'] += final_enhanced.get('tokens', {}).get('prompt', 0)
+                total_tokens['completion'] += final_enhanced.get('tokens', {}).get('completion', 0)
+
         all_insights['total_tokens'] = total_tokens
         all_insights['total_cost_estimate'] = self._estimate_cost(total_tokens)
 
-        logger.info(f"✓ Generated insights for {len(all_insights['topics'])} topics")
+        logger.info(f"\n✓ Completed 12-request enhanced analysis")
         logger.info(f"  Total tokens: {total_tokens['prompt'] + total_tokens['completion']:,}")
         logger.info(f"  Estimated cost: ${all_insights['total_cost_estimate']:.4f}")
 
@@ -145,8 +216,9 @@ class TopicBasedInsightsGenerator:
         return topic_data
 
     def _generate_topic_insights(self, topic_id: str, topic_name: str,
-                                 description: str, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate AI insights for a specific topic"""
+                                 description: str, data: Dict[str, Any],
+                                 metrics_dict: str = '', patterns: str = '') -> Dict[str, Any]:
+        """Generate AI insights for a specific topic with consolidated metrics"""
         try:
             # Prepare focused prompt for this topic
             data_summary = json.dumps(data, indent=2, default=str)
@@ -156,12 +228,20 @@ class TopicBasedInsightsGenerator:
             if len(data_summary) > max_chars:
                 data_summary = data_summary[:max_chars] + "\n\n[Data truncated...]"
 
+            # Add consolidated metrics context if available
+            consolidated_context = ""
+            if metrics_dict:
+                consolidated_context += f"\n\n**CONSOLIDATED METRICS REFERENCE:**\n{metrics_dict[:3000]}\n"
+            if patterns:
+                consolidated_context += f"\n**KEY PATTERNS DETECTED:**\n{patterns[:2000]}\n"
+
             prompt = f"""You are a world-class social media marketing strategist and growth expert for {BRAND_NAME}.
 You have deep expertise in social media algorithms, content strategy, audience psychology, and data-driven optimization.
 
 Analyze this {topic_name.upper()} data from {START_DATE} to {END_DATE}:
 
 {data_summary}
+{consolidated_context}
 
 **CRITICAL REQUIREMENTS:**
 1. EVERY recommendation MUST cite specific numbers from the data above (e.g., "Your data shows posts average 7.12% engagement vs reels at 5.94%...")
@@ -591,6 +671,390 @@ You are known for recommendations that stand up to scrutiny because everything i
                 'status': 'error',
                 'error': str(e)
             }
+
+    # === PHASE 1: DATA CONSOLIDATION METHODS ===
+
+    def _generate_metrics_dictionary(self, analytics_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract and consolidate all key metrics into a structured dictionary"""
+        try:
+            data_json = json.dumps(analytics_data, indent=2, default=str)[:15000]
+
+            prompt = f"""You are a data analyst creating a comprehensive metrics dictionary for {BRAND_NAME}.
+
+RAW ANALYTICS DATA:
+{data_json}
+
+Create a STRUCTURED METRICS DICTIONARY extracting EVERY important number:
+
+## KEY PERFORMANCE INDICATORS
+List ALL metrics with exact numbers:
+- Instagram Posts: Engagement rate X%, total reach Y, total interactions Z, post count N
+- Instagram Reels: Engagement rate X%, total reach Y, total interactions Z, post count N
+- Facebook: [same format]
+- Best performing post: X% engagement, Y reach
+- Worst performing post: X% engagement, Y reach
+- etc.
+
+## CONTENT METRICS
+- Average caption length: X characters
+- Posts with hashtags: X (Y%)
+- Average hashtags per post: X
+- Most used hashtags: [list with counts]
+- etc.
+
+## TIMING METRICS
+- Most active posting hours: [list with counts]
+- Most active posting days: [list with counts]
+- Best performing hours: [list with avg engagement]
+- Best performing days: [list with avg engagement]
+- etc.
+
+## TREND METRICS
+- Weekly performance changes: Week X: Y posts, Z% avg engagement
+- Growth rates: +X% engagement, +Y% reach
+- etc.
+
+## PLATFORM COMPARISON
+- Instagram vs Facebook: X% vs Y% engagement, A reach vs B reach
+- Posts vs Reels: X% vs Y% engagement
+- Performance gap: +Z%
+- etc.
+
+**FORMAT REQUIREMENTS:**
+- Every metric must have an EXACT number
+- Use format: "Metric name: X (specific value with units)"
+- Include percentage breakdowns where relevant
+- Note any missing data as "N/A"
+
+Create a comprehensive reference that subsequent analysis can cite."""
+
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a meticulous data analyst who extracts every relevant metric from raw data. You create structured, comprehensive dictionaries that serve as authoritative references."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.1,  # Lower for factual extraction
+                max_tokens=2000
+            )
+
+            return {
+                'status': 'success',
+                'content': response.choices[0].message.content,
+                'tokens': {
+                    'prompt': response.usage.prompt_tokens,
+                    'completion': response.usage.completion_tokens
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error generating metrics dictionary: {e}")
+            return {'status': 'error', 'error': str(e)}
+
+    def _detect_cross_metric_patterns(self, analytics_data: Dict[str, Any],
+                                     metrics_dict: str) -> Dict[str, Any]:
+        """Detect correlations and patterns across different metrics"""
+        try:
+            # Extract enhanced content data for pattern detection
+            enhanced_data = analytics_data.get('enhanced_content', {})
+            enhanced_json = json.dumps(enhanced_data, indent=2, default=str)[:10000]
+
+            prompt = f"""You are a data scientist detecting patterns and correlations for {BRAND_NAME}.
+
+METRICS REFERENCE:
+{metrics_dict[:4000]}
+
+DETAILED PERFORMANCE DATA:
+{enhanced_json}
+
+Identify CROSS-METRIC PATTERNS and CORRELATIONS:
+
+## PERFORMANCE CORRELATIONS
+What metrics move together?
+- "When X increases, Y tends to [increase/decrease] by Z%"
+- "Posts with X hashtags get Y% more engagement than posts with Z hashtags"
+- "Content posted at X hour gets Y% better reach than content at Z hour"
+- etc.
+
+## CONTENT ATTRIBUTE PATTERNS
+What content characteristics correlate with success?
+- "Posts with caption length X-Y characters get Z% higher engagement"
+- "Content including [specific elements] performs X% better"
+- etc.
+
+## TIME-BASED PATTERNS
+- "Posting frequency of X per week correlates with Y% engagement"
+- "Day of week Z shows X% higher engagement than average"
+- etc.
+
+## FORMAT PERFORMANCE PATTERNS
+- "Reels with X characteristic get Y% more reach than those without"
+- etc.
+
+## HIDDEN INSIGHTS
+Find non-obvious connections:
+- Surprising correlations
+- Counter-intuitive findings
+- Underutilized opportunities
+
+**REQUIREMENTS:**
+- Every pattern must cite SPECIFIC numbers
+- Show correlation strength (strong/moderate/weak)
+- Identify causation vs correlation
+- Note sample sizes
+
+This will be used to strengthen recommendations with data-backed connections."""
+
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a data scientist specialized in finding meaningful patterns and correlations in social media data. You identify both obvious and non-obvious relationships between metrics."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.2,
+                max_tokens=1500
+            )
+
+            return {
+                'status': 'success',
+                'content': response.choices[0].message.content,
+                'tokens': {
+                    'prompt': response.usage.prompt_tokens,
+                    'completion': response.usage.completion_tokens
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error detecting patterns: {e}")
+            return {'status': 'error', 'error': str(e)}
+
+    # === PHASE 4: VALIDATION METHODS ===
+
+    def _validate_data_citations(self, recommendations: str,
+                                metrics_dict: str) -> Dict[str, Any]:
+        """Validate that every recommendation cites specific data"""
+        try:
+            prompt = f"""You are a quality auditor reviewing strategic recommendations for {BRAND_NAME}.
+
+METRICS DICTIONARY (Source of Truth):
+{metrics_dict[:5000]}
+
+RECOMMENDATIONS TO VALIDATE:
+{recommendations[:8000]}
+
+AUDIT TASK: Check if EVERY recommendation properly cites data.
+
+For each recommendation/action in the document:
+
+## COMPLIANT EXAMPLES ✓
+- "Your Instagram posts (7.12% engagement) outperform Reels (5.94%)..." [CITES SPECIFIC METRICS]
+- "With only 17 posts generating 17,981 reach..." [CITES ACTUAL NUMBERS]
+
+## NON-COMPLIANT EXAMPLES ✗
+- "Optimize posting schedule" [NO DATA CITED]
+- "Engagement is low" [VAGUE, NO NUMBERS]
+- "Post more frequently" [NO BASELINE REFERENCED]
+
+PROVIDE:
+
+### 1. VALIDATION SCORE
+- X out of Y recommendations properly cite data (Z%)
+
+### 2. MISSING DATA CITATIONS
+List recommendations that lack specific data citations:
+- "Recommendation: [quote]" → Missing: Should cite [specific metric from dictionary]
+
+### 3. IMPROVEMENT SUGGESTIONS
+For each flagged item, suggest the correction:
+- Original: "[vague statement]"
+- Improved: "[statement with specific metric citation]"
+
+Be strict - every action/recommendation MUST reference specific numbers from the data."""
+
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a strict quality auditor. Your job is to ensure every recommendation is backed by specific data citations. You flag any vague or generic advice."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.1,
+                max_tokens=2000
+            )
+
+            return {
+                'status': 'success',
+                'content': response.choices[0].message.content,
+                'tokens': {
+                    'prompt': response.usage.prompt_tokens,
+                    'completion': response.usage.completion_tokens
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error validating citations: {e}")
+            return {'status': 'error', 'error': str(e)}
+
+    def _review_research_sources(self, recommendations: str) -> Dict[str, Any]:
+        """Review the quality and plausibility of research citations"""
+        try:
+            prompt = f"""You are a research librarian reviewing citations in marketing recommendations for {BRAND_NAME}.
+
+RECOMMENDATIONS WITH RESEARCH CITATIONS:
+{recommendations[:10000]}
+
+REVIEW TASK: Assess the quality and plausibility of research citations.
+
+## EVALUATE EACH CITATION:
+
+### 1. PLAUSIBILITY CHECK
+Identify citations and assess if they're realistic:
+- ✓ PLAUSIBLE: "According to Hootsuite's 2024 Social Media Report..." [Known publisher, reasonable]
+- ✓ PLAUSIBLE: "Meta's 2024 Algorithm Update states..." [Official platform source]
+- ✗ SUSPICIOUS: "According to XYZ's 2024 study..." [Unknown publisher]
+- ✗ SUSPICIOUS: "Research shows..." [No source provided]
+
+### 2. CITATION QUALITY SCORE
+Rate overall citation quality: X/10
+- Percentage with named sources: Y%
+- Percentage with year: Z%
+- Percentage from credible publishers: W%
+
+### 3. MISSING SOURCES
+List recommendations that should cite research but don't:
+- "Claim: [quote]" → Should cite: [type of research that would support this]
+
+### 4. SUGGESTED ALTERNATIVES
+For weak/missing citations, suggest credible sources:
+- Original: "Studies show..."
+- Suggested: "According to [credible source] like Sprout Social/Hootsuite/Buffer/Later..."
+
+### 5. CREDIBLE SOURCE RECOMMENDATIONS
+List 10-15 credible social media research publishers the analyst should reference:
+- Hootsuite (annual reports)
+- Sprout Social (quarterly benchmarks)
+- Meta Business (algorithm updates)
+- etc.
+
+Be helpful - suggest realistic improvements while maintaining rigor."""
+
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a research librarian who evaluates citation quality. You know credible social media research publishers and can spot vague or missing sources. You're helpful and suggest realistic alternatives."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.2,
+                max_tokens=1800
+            )
+
+            return {
+                'status': 'success',
+                'content': response.choices[0].message.content,
+                'tokens': {
+                    'prompt': response.usage.prompt_tokens,
+                    'completion': response.usage.completion_tokens
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error reviewing sources: {e}")
+            return {'status': 'error', 'error': str(e)}
+
+    def _enhance_recommendations(self, recommendations: str,
+                                citation_validation: str,
+                                source_review: str) -> Dict[str, Any]:
+        """Final enhancement pass incorporating validation feedback"""
+        try:
+            prompt = f"""You are refining strategic recommendations for {BRAND_NAME} based on quality review feedback.
+
+ORIGINAL RECOMMENDATIONS:
+{recommendations[:7000]}
+
+CITATION VALIDATION FEEDBACK:
+{citation_validation[:2500]}
+
+RESEARCH SOURCE REVIEW:
+{source_review[:2500]}
+
+TASK: Produce FINAL ENHANCED RECOMMENDATIONS incorporating all feedback.
+
+## ENHANCEMENT REQUIREMENTS:
+
+1. **Fix Missing Data Citations**
+   - Add specific metrics to any vague statements
+   - Replace generic advice with data-backed specifics
+
+2. **Strengthen Research Sources**
+   - Replace weak citations with credible sources
+   - Add sources where missing
+   - Use suggested alternatives from review
+
+3. **Maintain Structure**
+   - Keep the same sections and organization
+   - Preserve all good content that already had proper citations
+   - Only enhance weak areas
+
+4. **Quality Standards**
+   - Every action: Data citation + Research citation + Calculation
+   - Every claim: Verifiable and specific
+   - No generic advice
+
+OUTPUT the COMPLETE enhanced version of the strategic action plan with all improvements integrated.
+
+Make this publication-ready - every recommendation should withstand scrutiny."""
+
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a senior editor finalizing a strategic document. You integrate feedback seamlessly while maintaining the document's value and readability. You're meticulous about data citations and research sources."""
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=OPENAI_TEMPERATURE,
+                max_tokens=3500
+            )
+
+            return {
+                'status': 'success',
+                'content': response.choices[0].message.content,
+                'tokens': {
+                    'prompt': response.usage.prompt_tokens,
+                    'completion': response.usage.completion_tokens
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error enhancing recommendations: {e}")
+            return {'status': 'error', 'error': str(e)}
 
     def _estimate_cost(self, tokens: Dict[str, int]) -> float:
         """Estimate OpenAI API cost"""
