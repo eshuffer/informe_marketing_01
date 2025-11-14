@@ -117,17 +117,19 @@ class MarkdownReportGenerator:
         """Generate table of contents"""
         return """## 📑 Table of Contents
 
-1. [Executive Summary](#-executive-summary)
-2. [Overview](#-overview)
-3. [Platform Performance](#-platform-performance-comparison)
-4. [Engagement Analysis](#-engagement-analysis)
-5. [Content Performance](#-content-performance)
-6. [Trends Analysis](#-trends-analysis)
-7. [Audience Demographics](#-audience-demographics)
-8. [Best Posting Times](#-optimal-posting-times)
-9. [AI Strategic Insights](#-ai-powered-strategic-insights)
-10. [Recommendations](#-recommendations)
-11. [Appendix](#-appendix)
+1. [Executive Summary](#executive-summary)
+2. [Overview](#overview)
+3. [Platform Performance](#platform-performance-comparison)
+4. [Engagement Analysis](#engagement-analysis)
+5. [Content Performance](#content-performance)
+6. [Detailed Content Insights](#detailed-content-insights)
+7. [Trends Analysis](#trends-analysis)
+8. [Audience Demographics](#audience-demographics)
+9. [Best Posting Times](#optimal-posting-times)
+10. [AI Strategic Insights](#ai-powered-strategic-insights)
+11. [AI Strategic Action Plan](#ai-strategic-action-plan)
+12. [Recommendations](#recommendations)
+13. [Appendix](#appendix)
 
 ---
 
