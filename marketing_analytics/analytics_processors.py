@@ -8,6 +8,8 @@ from typing import Dict, List, Any, Optional
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+import re
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -336,3 +338,137 @@ class ContentPerformanceAnalyzer:
             analysis['sessions'].append(session_info)
 
         return analysis
+
+
+class HashtagAnalyzer:
+    """Analyze hashtag performance from post content"""
+
+    @staticmethod
+    def extract_hashtags(text: str) -> List[str]:
+        """Extract hashtags from text"""
+        if not text or not isinstance(text, str):
+            return []
+
+        # Find all hashtags (# followed by word characters, allowing underscores and numbers)
+        hashtags = re.findall(r'#(\w+)', text)
+
+        # Return lowercase versions for consistency
+        return [tag.lower() for tag in hashtags]
+
+    @staticmethod
+    def analyze_hashtag_performance(posts_df: pd.DataFrame) -> Dict[str, Any]:
+        """Analyze hashtag performance from posts"""
+        if posts_df is None or posts_df.empty:
+            return {'error': 'No post data available'}
+
+        # Calculate engagement rate if not present
+        if 'engagement_rate' not in posts_df.columns:
+            posts_df['engagement_rate'] = posts_df.apply(
+                EngagementAnalyzer.calculate_engagement_rate, axis=1
+            )
+
+        # Extract hashtags from all available text fields
+        hashtag_stats = defaultdict(lambda: {
+            'count': 0,
+            'total_engagement': 0,
+            'total_reach': 0,
+            'total_interactions': 0,
+            'post_ids': []
+        })
+
+        text_fields = ['text', 'caption', 'description', 'content', 'message', 'full_text', 'preview']
+
+        for idx, post in posts_df.iterrows():
+            # Get post text from available fields
+            post_text = ''
+            for field in text_fields:
+                if field in post and pd.notna(post[field]):
+                    post_text = str(post[field])
+                    break
+
+            if not post_text:
+                continue
+
+            # Extract hashtags
+            hashtags = HashtagAnalyzer.extract_hashtags(post_text)
+
+            if not hashtags:
+                continue
+
+            # Get post metrics
+            engagement_rate = post.get('engagement_rate', 0)
+            reach = post.get('reach', 0) if pd.notna(post.get('reach')) else 0
+            interactions = post.get('interactions', 0) if pd.notna(post.get('interactions')) else 0
+
+            # Update stats for each hashtag
+            for hashtag in hashtags:
+                hashtag_stats[hashtag]['count'] += 1
+                hashtag_stats[hashtag]['total_engagement'] += engagement_rate
+                hashtag_stats[hashtag]['total_reach'] += reach
+                hashtag_stats[hashtag]['total_interactions'] += interactions
+
+                # Store post ID if available
+                post_id = None
+                id_fields = ['id', 'postId', 'post_id', 'shortcode']
+                for field in id_fields:
+                    if field in post and pd.notna(post[field]):
+                        post_id = str(post[field])
+                        break
+                if post_id:
+                    hashtag_stats[hashtag]['post_ids'].append(post_id)
+
+        # Calculate averages and create results
+        hashtag_results = []
+        for hashtag, stats in hashtag_stats.items():
+            count = stats['count']
+            result = {
+                'hashtag': f"#{hashtag}",
+                'usage_count': count,
+                'avg_engagement_rate': stats['total_engagement'] / count if count > 0 else 0,
+                'avg_reach': stats['total_reach'] / count if count > 0 else 0,
+                'avg_interactions': stats['total_interactions'] / count if count > 0 else 0,
+                'total_reach': stats['total_reach'],
+                'total_interactions': stats['total_interactions']
+            }
+            hashtag_results.append(result)
+
+        # Sort by average engagement rate
+        hashtag_results.sort(key=lambda x: x['avg_engagement_rate'], reverse=True)
+
+        # Get overall stats
+        posts_with_hashtags = 0
+        posts_without_hashtags = 0
+
+        for idx, post in posts_df.iterrows():
+            post_text = ''
+            for field in text_fields:
+                if field in post and pd.notna(post[field]):
+                    post_text = str(post[field])
+                    break
+
+            hashtags = HashtagAnalyzer.extract_hashtags(post_text)
+            if hashtags:
+                posts_with_hashtags += 1
+            else:
+                posts_without_hashtags += 1
+
+        # Calculate average engagement for posts with vs without hashtags
+        posts_df['has_hashtags'] = posts_df.apply(
+            lambda row: len(HashtagAnalyzer.extract_hashtags(
+                str(next((row[field] for field in text_fields if field in row and pd.notna(row[field])), ''))
+            )) > 0,
+            axis=1
+        )
+
+        avg_engagement_with_hashtags = posts_df[posts_df['has_hashtags']]['engagement_rate'].mean() if posts_with_hashtags > 0 else 0
+        avg_engagement_without_hashtags = posts_df[~posts_df['has_hashtags']]['engagement_rate'].mean() if posts_without_hashtags > 0 else 0
+
+        return {
+            'hashtag_performance': hashtag_results,
+            'total_unique_hashtags': len(hashtag_results),
+            'posts_with_hashtags': posts_with_hashtags,
+            'posts_without_hashtags': posts_without_hashtags,
+            'avg_engagement_with_hashtags': avg_engagement_with_hashtags,
+            'avg_engagement_without_hashtags': avg_engagement_without_hashtags,
+            'hashtag_lift': ((avg_engagement_with_hashtags - avg_engagement_without_hashtags) / avg_engagement_without_hashtags * 100) if avg_engagement_without_hashtags > 0 else 0
+        }

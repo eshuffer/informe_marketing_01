@@ -52,6 +52,10 @@ class MarkdownReportGenerator:
             # Content Performance
             f.write(self._generate_content_performance(analytics_data))
 
+            # Hashtag Performance (only if data exists)
+            if self._has_hashtag_data(analytics_data):
+                f.write(self._generate_hashtag_performance(analytics_data))
+
             # Top Performers vs Average
             f.write(self._generate_top_performers(analytics_data))
 
@@ -125,15 +129,16 @@ class MarkdownReportGenerator:
 3. [Platform Performance](#platform-performance-comparison)
 4. [Engagement Analysis](#engagement-analysis)
 5. [Content Performance](#content-performance)
-6. [Top Performers vs Average](#top-performers-vs-average)
-7. [Detailed Content Insights](#detailed-content-insights)
-8. [Trends Analysis](#trends-analysis)
-9. [Audience Demographics](#audience-demographics)
-10. [Best Posting Times](#optimal-posting-times)
-11. [AI Strategic Insights](#ai-powered-strategic-insights)
-12. [AI Strategic Action Plan](#ai-strategic-action-plan)
-13. [Recommendations](#recommendations)
-14. [Appendix](#appendix)
+6. [Hashtag Performance](#hashtag-performance)
+7. [Top Performers vs Average](#top-performers-vs-average)
+8. [Detailed Content Insights](#detailed-content-insights)
+9. [Trends Analysis](#trends-analysis)
+10. [Audience Demographics](#audience-demographics)
+11. [Best Posting Times](#optimal-posting-times)
+12. [AI Strategic Insights](#ai-powered-strategic-insights)
+13. [AI Strategic Action Plan](#ai-strategic-action-plan)
+14. [Recommendations](#recommendations)
+15. [Appendix](#appendix)
 
 ---
 
@@ -261,6 +266,98 @@ class MarkdownReportGenerator:
 
         return output
 
+    def _generate_hashtag_performance(self, data: Dict[str, Any]) -> str:
+        """Generate hashtag performance section"""
+        output = "\n---\n\n## #️⃣ Hashtag Performance\n\n"
+        output += "*Analysis of hashtag usage and effectiveness*\n\n"
+
+        content_perf = data.get('content_performance', {})
+        hashtag_analysis = content_perf.get('hashtag_analysis', {})
+
+        if not hashtag_analysis:
+            return ""
+
+        # Process each platform/content type
+        for platform, hashtag_data in hashtag_analysis.items():
+            if 'error' in hashtag_data:
+                continue
+
+            # Extract platform name and type (e.g., "Instagram_Posts" -> "Instagram", "Posts")
+            platform_parts = platform.split('_')
+            platform_name = platform_parts[0] if len(platform_parts) > 0 else platform
+            content_type = platform_parts[1] if len(platform_parts) > 1 else "Content"
+
+            output += f"### {platform_name.title()} {content_type}\n\n"
+
+            # Overall statistics
+            total_hashtags = hashtag_data.get('total_unique_hashtags', 0)
+            posts_with = hashtag_data.get('posts_with_hashtags', 0)
+            posts_without = hashtag_data.get('posts_without_hashtags', 0)
+            avg_eng_with = hashtag_data.get('avg_engagement_with_hashtags', 0)
+            avg_eng_without = hashtag_data.get('avg_engagement_without_hashtags', 0)
+            hashtag_lift = hashtag_data.get('hashtag_lift', 0)
+
+            output += "**📊 Overall Hashtag Impact:**\n\n"
+            output += f"- **Total Unique Hashtags:** {total_hashtags}\n"
+            output += f"- **Posts with Hashtags:** {posts_with} ({posts_with / (posts_with + posts_without) * 100:.1f}%)\n" if (posts_with + posts_without) > 0 else "- **Posts with Hashtags:** 0\n"
+            output += f"- **Posts without Hashtags:** {posts_without}\n"
+            output += f"- **Avg Engagement with Hashtags:** {avg_eng_with:.2f}%\n"
+            output += f"- **Avg Engagement without Hashtags:** {avg_eng_without:.2f}%\n"
+
+            # Hashtag lift indicator
+            if hashtag_lift > 0:
+                output += f"- **Hashtag Lift:** 🔺 +{hashtag_lift:.1f}% (hashtags boost engagement)\n\n"
+            elif hashtag_lift < 0:
+                output += f"- **Hashtag Lift:** 🔻 {hashtag_lift:.1f}% (hashtags reduce engagement)\n\n"
+            else:
+                output += f"- **Hashtag Lift:** ➡️ No significant impact\n\n"
+
+            # Top performing hashtags
+            hashtag_performance = hashtag_data.get('hashtag_performance', [])
+            if hashtag_performance and len(hashtag_performance) > 0:
+                output += "**🏆 Top 10 Hashtags by Engagement:**\n\n"
+                output += "| Rank | Hashtag | Uses | Avg Engagement | Avg Reach | Avg Interactions |\n"
+                output += "|------|---------|------|----------------|-----------|------------------|\n"
+
+                for i, hashtag in enumerate(hashtag_performance[:10], 1):
+                    medal = ""
+                    if i == 1:
+                        medal = "🥇 "
+                    elif i == 2:
+                        medal = "🥈 "
+                    elif i == 3:
+                        medal = "🥉 "
+
+                    tag_name = hashtag.get('hashtag', '')
+                    usage = hashtag.get('usage_count', 0)
+                    avg_eng = hashtag.get('avg_engagement_rate', 0)
+                    avg_reach = hashtag.get('avg_reach', 0)
+                    avg_int = hashtag.get('avg_interactions', 0)
+
+                    output += f"| {medal}#{i} | {tag_name} | {usage} | {avg_eng:.2f}% | {avg_reach:,.0f} | {avg_int:,.1f} |\n"
+
+                output += "\n"
+
+                # Key insights
+                if len(hashtag_performance) >= 3:
+                    top_3_avg_eng = sum(h.get('avg_engagement_rate', 0) for h in hashtag_performance[:3]) / 3
+                    most_used = max(hashtag_performance, key=lambda x: x.get('usage_count', 0))
+
+                    output += "**💡 Key Insights:**\n\n"
+                    output += f"- Top 3 hashtags average {top_3_avg_eng:.2f}% engagement\n"
+                    output += f"- Most used hashtag: {most_used.get('hashtag', 'N/A')} ({most_used.get('usage_count', 0)} times)\n"
+
+                    if avg_eng_with > avg_eng_without:
+                        output += f"- ✅ **Recommendation:** Continue using hashtags - they improve engagement by {hashtag_lift:.1f}%\n"
+                    elif avg_eng_without > avg_eng_with:
+                        output += f"- ⚠️ **Recommendation:** Review hashtag strategy - posts without hashtags perform {abs(hashtag_lift):.1f}% better\n"
+
+                    output += "\n"
+
+            output += "---\n\n"
+
+        return output
+
     def _generate_top_performers(self, data: Dict[str, Any]) -> str:
         """Generate top performers vs average comparison section"""
         output = "\n---\n\n## 🏅 Top Performers vs Average\n\n"
@@ -284,7 +381,11 @@ class MarkdownReportGenerator:
             if not top_posts or len(top_posts) == 0:
                 continue
 
-            output += f"### {platform.title()}\n\n"
+            # Extract platform name and content type (e.g., "Instagram_Posts" -> "Instagram", "Posts")
+            platform_parts = platform.split('_')
+            platform_name = platform_parts[0] if len(platform_parts) > 0 else platform
+
+            output += f"### {platform_name.title()}\n\n"
 
             # Separate posts and reels based on platform naming or type
             # Assuming platform names like "Instagram_Posts" and "Instagram_Reels"
@@ -530,6 +631,12 @@ class MarkdownReportGenerator:
                 if data_array and len(data_array) > 0:
                     return True
         return False
+
+    def _has_hashtag_data(self, data: Dict[str, Any]) -> bool:
+        """Check if hashtag data exists"""
+        content_perf = data.get('content_performance', {})
+        hashtag_analysis = content_perf.get('hashtag_analysis', {})
+        return bool(hashtag_analysis and any('error' not in v for v in hashtag_analysis.values()))
 
     def _generate_enhanced_insights(self, data: Dict[str, Any]) -> str:
         """Generate enhanced content insights section"""
