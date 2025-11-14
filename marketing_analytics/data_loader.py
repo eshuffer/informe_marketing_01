@@ -100,7 +100,7 @@ class MetricoolDataLoader:
             'facebook': self.load_json(self.data_dir / 'analytics' / 'facebook_best_times.json'),
         }
 
-        logger.info("✅ All data loaded successfully")
+        logger.info("All data loaded successfully")
         return self.raw_data
 
     def _load_directory(self, dir_path: Path) -> Dict[str, Any]:
@@ -185,11 +185,22 @@ class MetricoolDataLoader:
         if fetch_summary_path.exists():
             fetch_summary = self.load_json(fetch_summary_path)
             if fetch_summary:
+                start_date = fetch_summary.get('start_date')
+                end_date = fetch_summary.get('end_date')
+
                 summary['date_range'] = {
-                    'start': fetch_summary.get('start_date'),
-                    'end': fetch_summary.get('end_date'),
-                    'days': (datetime.fromisoformat(fetch_summary.get('end_date')) -
-                            datetime.fromisoformat(fetch_summary.get('start_date'))).days
+                    'start': start_date,
+                    'end': end_date,
                 }
+
+                # Calculate days if both dates are valid strings
+                if isinstance(start_date, str) and isinstance(end_date, str):
+                    try:
+                        summary['date_range']['days'] = (
+                            datetime.fromisoformat(end_date) -
+                            datetime.fromisoformat(start_date)
+                        ).days
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Could not parse dates: {e}")
 
         return summary

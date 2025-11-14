@@ -22,13 +22,14 @@ from ai_insights import AIInsightGenerator
 from report_generator import MarkdownReportGenerator
 from config import BRAND_NAME, ENABLED_PLATFORMS, REPORTS_DIR
 
-# Setup logging
+# Setup logging with UTF-8 encoding for Windows compatibility
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(REPORTS_DIR / 'analytics.log'),
-        logging.StreamHandler()
+        logging.FileHandler(REPORTS_DIR / 'analytics.log', encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
@@ -56,50 +57,50 @@ class MarketingAnalytics:
         logger.info("="*80)
 
         # Step 1: Load data
-        logger.info("\n📁 Step 1: Loading data...")
+        logger.info("\n[Step 1/9] Loading data...")
         self.raw_data = self.loader.load_all_data()
         summary = self.loader.get_summary_stats()
         self.analytics_results['summary'] = summary
-        logger.info(f"✅ Loaded {summary['data_counts']} files")
+        logger.info(f"Loaded {summary['data_counts']} files")
 
         # Step 2: Analyze engagement
-        logger.info("\n💬 Step 2: Analyzing engagement...")
+        logger.info("\n[Step 2/9] Analyzing engagement...")
         self.analyze_engagement()
 
         # Step 3: Analyze trends
-        logger.info("\n📈 Step 3: Analyzing trends...")
+        logger.info("\n[Step 3/9] Analyzing trends...")
         self.analyze_trends()
 
         # Step 4: Analyze content performance
-        logger.info("\n🎨 Step 4: Analyzing content performance...")
+        logger.info("\n[Step 4/9] Analyzing content performance...")
         self.analyze_content_performance()
 
         # Step 5: Analyze demographics
-        logger.info("\n👥 Step 5: Analyzing demographics...")
+        logger.info("\n[Step 5/9] Analyzing demographics...")
         self.analyze_demographics()
 
         # Step 6: Process best times
-        logger.info("\n⏰ Step 6: Processing optimal posting times...")
+        logger.info("\n[Step 6/9] Processing optimal posting times...")
         self.process_best_times()
 
         # Step 7: Create platform comparison
-        logger.info("\n🏆 Step 7: Creating platform comparison...")
+        logger.info("\n[Step 7/9] Creating platform comparison...")
         self.create_platform_comparison()
 
         # Step 8: Generate AI insights
-        logger.info("\n🤖 Step 8: Generating AI insights...")
+        logger.info("\n[Step 8/9] Generating AI insights...")
         ai_insights = self.generate_ai_insights()
 
         # Step 9: Generate report
-        logger.info("\n📊 Step 9: Generating report...")
+        logger.info("\n[Step 9/9] Generating report...")
         report_path = self.report_generator.generate_comprehensive_report(
             self.analytics_results,
             ai_insights
         )
 
         logger.info("\n" + "="*80)
-        logger.info("✅ Analysis Complete!")
-        logger.info(f"📄 Report saved to: {report_path}")
+        logger.info("SUCCESS: Analysis Complete!")
+        logger.info(f"Report saved to: {report_path}")
         logger.info("="*80)
 
         return report_path
@@ -265,13 +266,13 @@ def main():
         report_path = analytics.run_full_analysis()
 
         print("\n" + "="*80)
-        print(f"✅ SUCCESS!")
-        print(f"📄 Report available at: {report_path}")
+        print(f"SUCCESS!")
+        print(f"Report available at: {report_path}")
         print("="*80)
 
     except Exception as e:
         logger.error(f"Error during analysis: {e}", exc_info=True)
-        print(f"\n❌ Error: {e}")
+        print(f"\nERROR: {e}")
         sys.exit(1)
 
 
