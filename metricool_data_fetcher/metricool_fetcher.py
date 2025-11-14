@@ -202,7 +202,7 @@ class MetricoolDataFetcher:
             'posts_impressions': ('instagram', 'impressions', 'posts'),
             'posts_likes': ('instagram', 'likes', 'posts'),
             'posts_comments': ('instagram', 'comments', 'posts'),
-            'posts_saves': ('instagram', 'saves', 'posts'),
+            'posts_saves': ('instagram', 'saved', 'posts'),  # API uses 'saved' not 'saves'
             'reels_count': ('instagram', 'count', 'reels'),
             'reels_likes': ('instagram', 'likes', 'reels'),
             'reels_comments': ('instagram', 'comments', 'reels'),
@@ -306,7 +306,7 @@ class MetricoolDataFetcher:
         """Fetch Instagram-specific analytics"""
         logger.info("Fetching Instagram analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         # Only use working v2 endpoints
         endpoints = [
@@ -332,7 +332,7 @@ class MetricoolDataFetcher:
         """Fetch Facebook-specific analytics"""
         logger.info("Fetching Facebook analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         # Only use working v2 endpoints
         endpoints = [
@@ -357,7 +357,7 @@ class MetricoolDataFetcher:
         """Fetch LinkedIn-specific analytics"""
         logger.info("Fetching LinkedIn analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         endpoints = [
             ('/v2/analytics/posts/linkedin', 'linkedin_posts.json'),
@@ -385,7 +385,7 @@ class MetricoolDataFetcher:
         """Fetch TikTok-specific analytics"""
         logger.info("Fetching TikTok analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         data = make_api_request(
             '/v2/analytics/posts/tiktok',
@@ -407,7 +407,7 @@ class MetricoolDataFetcher:
         """Fetch Pinterest-specific analytics"""
         logger.info("Fetching Pinterest analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         data = make_api_request(
             '/v2/analytics/posts/pinterest',
@@ -424,7 +424,7 @@ class MetricoolDataFetcher:
         """Fetch Threads-specific analytics"""
         logger.info("Fetching Threads analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         data = make_api_request(
             '/v2/analytics/posts/threads',
@@ -441,7 +441,7 @@ class MetricoolDataFetcher:
         """Fetch Bluesky-specific analytics"""
         logger.info("Fetching Bluesky analytics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         data = make_api_request(
             '/v2/analytics/posts/bluesky',
@@ -458,7 +458,7 @@ class MetricoolDataFetcher:
         """Fetch general statistics"""
         logger.info("Fetching general statistics...")
 
-        date_params = get_date_range_params(self.start_date, self.end_date)
+        date_params = get_timeline_date_params(self.start_date, self.end_date)
 
         # Only fetch brand summary (distribution endpoint has issues)
         data = make_api_request(
