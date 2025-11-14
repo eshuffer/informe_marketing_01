@@ -74,6 +74,24 @@ class MarkdownReportGenerator:
                 f.write(ai_insights.get('insights', 'No insights generated'))
                 f.write("\n\n")
 
+                # AI Strategic Recommendations (separate from data-based recommendations)
+                if ai_insights.get('strategic_recommendations'):
+                    f.write("\n---\n\n")
+                    f.write("## 🎯 AI Strategic Action Plan\n\n")
+                    f.write(ai_insights.get('strategic_recommendations'))
+                    f.write("\n\n")
+
+                # Show token usage and cost
+                if 'tokens' in ai_insights:
+                    tokens = ai_insights['tokens']
+                    cost = ai_insights.get('cost_estimate', 0)
+                    f.write("\n---\n\n")
+                    f.write("### 💡 AI Analysis Metrics\n\n")
+                    f.write(f"- **Total tokens used:** {tokens.get('prompt', 0) + tokens.get('completion', 0):,}\n")
+                    f.write(f"- **Input tokens:** {tokens.get('prompt', 0):,}\n")
+                    f.write(f"- **Output tokens:** {tokens.get('completion', 0):,}\n")
+                    f.write(f"- **Estimated cost:** ${cost:.4f}\n\n")
+
             # Recommendations
             f.write(self._generate_recommendations(analytics_data))
 
