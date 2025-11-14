@@ -18,6 +18,7 @@ from analytics_processors import (
     DemographicAnalyzer,
     ContentPerformanceAnalyzer
 )
+from enhanced_analytics import EnhancedContentAnalyzer
 from ai_insights import AIInsightGenerator
 from report_generator import MarkdownReportGenerator
 from config import BRAND_NAME, ENABLED_PLATFORMS, REPORTS_DIR
@@ -44,6 +45,7 @@ class MarketingAnalytics:
         self.trend_analyzer = TrendAnalyzer()
         self.demo_analyzer = DemographicAnalyzer()
         self.content_analyzer = ContentPerformanceAnalyzer()
+        self.enhanced_analyzer = EnhancedContentAnalyzer()
         self.ai_generator = AIInsightGenerator()
         self.report_generator = MarkdownReportGenerator()
 
@@ -57,42 +59,46 @@ class MarketingAnalytics:
         logger.info("="*80)
 
         # Step 1: Load data
-        logger.info("\n[Step 1/9] Loading data...")
+        logger.info("\n[Step 1/10] Loading data...")
         self.raw_data = self.loader.load_all_data()
         summary = self.loader.get_summary_stats()
         self.analytics_results['summary'] = summary
         logger.info(f"Loaded {summary['data_counts']} files")
 
         # Step 2: Analyze engagement
-        logger.info("\n[Step 2/9] Analyzing engagement...")
+        logger.info("\n[Step 2/10] Analyzing engagement...")
         self.analyze_engagement()
 
         # Step 3: Analyze trends
-        logger.info("\n[Step 3/9] Analyzing trends...")
+        logger.info("\n[Step 3/10] Analyzing trends...")
         self.analyze_trends()
 
         # Step 4: Analyze content performance
-        logger.info("\n[Step 4/9] Analyzing content performance...")
+        logger.info("\n[Step 4/10] Analyzing content performance...")
         self.analyze_content_performance()
 
-        # Step 5: Analyze demographics
-        logger.info("\n[Step 5/9] Analyzing demographics...")
+        # Step 5: Enhanced content analysis
+        logger.info("\n[Step 5/10] Running enhanced content analysis...")
+        self.analyze_enhanced_content()
+
+        # Step 6: Analyze demographics
+        logger.info("\n[Step 6/10] Analyzing demographics...")
         self.analyze_demographics()
 
-        # Step 6: Process best times
-        logger.info("\n[Step 6/9] Processing optimal posting times...")
+        # Step 7: Process best times
+        logger.info("\n[Step 7/10] Processing optimal posting times...")
         self.process_best_times()
 
-        # Step 7: Create platform comparison
-        logger.info("\n[Step 7/9] Creating platform comparison...")
+        # Step 8: Create platform comparison
+        logger.info("\n[Step 8/10] Creating platform comparison...")
         self.create_platform_comparison()
 
-        # Step 8: Generate AI insights
-        logger.info("\n[Step 8/9] Generating AI insights...")
+        # Step 9: Generate AI insights
+        logger.info("\n[Step 9/10] Generating AI insights...")
         ai_insights = self.generate_ai_insights()
 
-        # Step 9: Generate report
-        logger.info("\n[Step 9/9] Generating report...")
+        # Step 10: Generate report
+        logger.info("\n[Step 10/10] Generating report...")
         report_path = self.report_generator.generate_comprehensive_report(
             self.analytics_results,
             ai_insights
@@ -196,6 +202,61 @@ class MarketingAnalytics:
                     )
 
         self.analytics_results['demographics'] = demo_results
+
+    def analyze_enhanced_content(self):
+        """Run enhanced content analysis"""
+        enhanced_results = {}
+
+        for platform in ENABLED_PLATFORMS:
+            platform_results = {}
+
+            # Analyze posts
+            posts_df = self.loader.get_posts_dataframe(platform, 'posts')
+            if posts_df is not None and not posts_df.empty:
+                logger.info(f"  Enhanced analysis for {platform} posts...")
+
+                # Posting patterns
+                posting_patterns = self.enhanced_analyzer.analyze_posting_patterns(posts_df)
+                if 'error' not in posting_patterns:
+                    platform_results['posting_patterns'] = posting_patterns
+
+                # Engagement by time
+                time_engagement = self.enhanced_analyzer.analyze_engagement_by_time(posts_df)
+                if 'error' not in time_engagement:
+                    platform_results['engagement_by_time'] = time_engagement
+
+                # Content length analysis
+                length_analysis = self.enhanced_analyzer.analyze_content_length(posts_df)
+                if 'error' not in length_analysis and 'info' not in length_analysis:
+                    platform_results['content_length'] = length_analysis
+
+                # Hashtag analysis
+                hashtag_analysis = self.enhanced_analyzer.analyze_hashtag_usage(posts_df)
+                if 'error' not in hashtag_analysis and 'info' not in hashtag_analysis:
+                    platform_results['hashtag_analysis'] = hashtag_analysis
+
+                # Performance trends
+                performance_trends = self.enhanced_analyzer.analyze_performance_trends(posts_df)
+                if 'error' not in performance_trends:
+                    platform_results['performance_trends'] = performance_trends
+
+            # Analyze reels separately
+            reels_df = self.loader.get_posts_dataframe(platform, 'reels')
+            if reels_df is not None and not reels_df.empty:
+                logger.info(f"  Enhanced analysis for {platform} reels...")
+
+                reels_patterns = self.enhanced_analyzer.analyze_posting_patterns(reels_df)
+                if 'error' not in reels_patterns:
+                    platform_results['reels_posting_patterns'] = reels_patterns
+
+                reels_trends = self.enhanced_analyzer.analyze_performance_trends(reels_df)
+                if 'error' not in reels_trends:
+                    platform_results['reels_performance_trends'] = reels_trends
+
+            if platform_results:
+                enhanced_results[platform] = platform_results
+
+        self.analytics_results['enhanced_content'] = enhanced_results
 
     def process_best_times(self):
         """Process optimal posting times"""
