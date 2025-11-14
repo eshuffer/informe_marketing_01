@@ -201,23 +201,17 @@ class MetricoolDataFetcher:
 
         date_params = get_date_range_params(self.start_date, self.end_date)
 
-        # Only fetch working endpoints
-        endpoints = [
-            ('/v2/analytics/distribution', 'distribution.json'),
-            ('/v2/analytics/brand-summary/posts', 'brand_summary_posts.json'),
-        ]
-
-        for endpoint, filename in tqdm(endpoints, desc="General Stats"):
-            data = make_api_request(
-                endpoint,
-                params=date_params,
-                blog_id=self.blog_id
+        # Only fetch brand summary (distribution endpoint has issues)
+        data = make_api_request(
+            '/v2/analytics/brand-summary/posts',
+            params=date_params,
+            blog_id=self.blog_id
+        )
+        if data:
+            save_json(
+                data,
+                DATA_DIR / 'stats' / 'brand_summary_posts.json'
             )
-            if data:
-                save_json(
-                    data,
-                    DATA_DIR / 'stats' / filename
-                )
 
     def fetch_demographic_data(self):
         """Fetch demographic data (age, gender, location) - Only connected platforms"""
@@ -340,34 +334,9 @@ class MetricoolDataFetcher:
                 DATA_DIR / 'media' / 'videos.json'
             )
 
-        # Get all media
-        data = make_api_request(
-            '/v2/media',
-            blog_id=self.blog_id
-        )
-        if data:
-            save_json(
-                data,
-                DATA_DIR / 'media' / 'all_media.json'
-            )
-
     def fetch_hashtag_data(self):
         """Fetch hashtag tracking data"""
         logger.info("Fetching hashtag data...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        # Get hashtag analytics
-        data = make_api_request(
-            '/v2/analytics/hashtags',
-            params=date_params,
-            blog_id=self.blog_id
-        )
-        if data:
-            save_json(
-                data,
-                DATA_DIR / 'analytics' / 'hashtags.json'
-            )
 
         # Get hashtag tracking sessions
         data = make_api_request(
