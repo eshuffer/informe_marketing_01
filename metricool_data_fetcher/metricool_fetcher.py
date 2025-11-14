@@ -674,33 +674,9 @@ class MetricoolDataFetcher:
                 sessions_data,
                 DATA_DIR / 'analytics' / 'hashtag_tracking_sessions.json'
             )
-
-            # For each tracking session, get detailed data
-            if 'data' in sessions_data and isinstance(sessions_data['data'], list):
-                for session in tqdm(sessions_data['data'], desc="Hashtag Sessions"):
-                    session_id = session.get('id')
-                    if session_id:
-                        # Get consolidation data
-                        consolidation = make_api_request(
-                            f'/v2/hashtags-tracker/tracking-sessions/{session_id}/consolidations',
-                            blog_id=self.blog_id
-                        )
-                        if consolidation:
-                            save_json(
-                                consolidation,
-                                DATA_DIR / 'analytics' / 'hashtags' / f'session_{session_id}_consolidation.json'
-                            )
-
-                        # Get distribution data
-                        distribution = make_api_request(
-                            f'/v2/hashtags-tracker/tracking-sessions/{session_id}/distribution',
-                            blog_id=self.blog_id
-                        )
-                        if distribution:
-                            save_json(
-                                distribution,
-                                DATA_DIR / 'analytics' / 'hashtags' / f'session_{session_id}_distribution.json'
-                            )
+            # Note: Per-session endpoints removed because:
+            # - /consolidations is POST only (for triggering manual sync, not retrieving data)
+            # - /distribution requires additional parameters (network, metric, from, to) that need to be specified per request
 
     def fetch_smart_links(self):
         """Fetch smart links data"""
