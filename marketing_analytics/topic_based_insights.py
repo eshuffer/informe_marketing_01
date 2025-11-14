@@ -163,57 +163,71 @@ Analyze this {topic_name.upper()} data from {START_DATE} to {END_DATE}:
 
 {data_summary}
 
+**CRITICAL REQUIREMENTS:**
+1. EVERY recommendation MUST cite specific numbers from the data above (e.g., "Your data shows posts average 7.12% engagement vs reels at 5.94%...")
+2. EVERY general claim MUST cite industry research/studies (e.g., "According to Meta's 2024 Algorithm Report...", "HubSpot's 2024 Social Media Study found...")
+3. NO GENERIC ADVICE - Every insight must be grounded in either YOUR data or CITED research
+4. When suggesting best practices, cite the source (e.g., "Hootsuite's 2024 research shows...", "Sprout Social's analysis of 10M posts found...")
+
+**GOOD EXAMPLE:** "Your Instagram posts (avg 7.12% engagement, 17,981 total reach) significantly outperform Reels (5.94% engagement). According to Later's 2024 Instagram Analysis of 5M posts, carousel posts achieve 1.4x higher engagement than Reels for accounts under 50K followers, suggesting you should increase carousel post frequency by 40%."
+
+**BAD EXAMPLE:** "Content relevance is important. Post at optimal times to increase engagement." [TOO GENERIC, NO DATA]
+
 Provide an EXTENSIVE, GURU-LEVEL strategic analysis:
 
 ## 1. DEEP DATA ANALYSIS (Be exhaustive)
-- Identify 5-7 key patterns and insights from the numbers
-- What does this data reveal about audience behavior?
-- What hidden opportunities exist in the data?
-- Compare performance across different dimensions
+- Identify 5-7 key patterns citing SPECIFIC NUMBERS from the data
+- What does this data reveal about audience behavior? (Reference actual metrics)
+- What hidden opportunities exist? (Compare specific data points)
+- Compare performance across different dimensions (use exact percentages/numbers)
 
 ## 2. STRATEGIC ASSESSMENT
-- What's working exceptionally well? (Provide 3-4 examples with evidence)
-- What's underperforming? (Identify 3-4 specific issues with root causes)
-- What trends are emerging over the time period?
-- How does this compare to industry benchmarks?
+- What's working exceptionally well? (Cite 3-4 examples with EXACT metrics from your data)
+- What's underperforming? (Identify 3-4 specific issues with ACTUAL numbers showing the gap)
+- What trends are emerging? (Reference SPECIFIC time-based changes in the data)
+- How does this compare to industry benchmarks? (Cite research: "According to [Source Year], industry average is X% vs your Y%")
 
 ## 3. ROOT CAUSE ANALYSIS
-- WHY are certain things performing well/poorly?
-- What psychological/algorithmic factors are at play?
-- What patterns connect high-performing content?
-- What mistakes are being repeated?
+- WHY are certain things performing well/poorly? (Cite platform algorithm documentation or research)
+- What psychological/algorithmic factors are at play? (Reference studies, e.g., "Meta's 2024 Engagement Study shows...")
+- What patterns connect high-performing content? (Use SPECIFIC examples from the data with numbers)
+- What mistakes are being repeated? (Identify with data evidence)
 
 ## 4. REACH OPTIMIZATION STRATEGIES
-- Specific tactics to increase reach by 20-50%
-- Algorithm-friendly best practices for this platform
-- Content format optimization for maximum distribution
-- Timing and frequency strategies for reach
+- Specific tactics to increase reach (Each backed by: YOUR data showing gap + Research showing solution works)
+- Algorithm-friendly best practices (Cite official platform documentation or credible studies)
+- Content format optimization (Reference YOUR format performance data + industry research)
+- Timing strategies (Base on YOUR actual posting time performance data if available)
 
 ## 5. COMPREHENSIVE ACTION PLAN
-Provide 8-10 specific, prioritized actions:
-
-For each action include:
-- ✓ Exact implementation steps (be specific!)
-- ✓ Expected impact (quantify: +X% reach, +Y% engagement)
-- ✓ Timeline (when to implement, how long to test)
-- ✓ Success metrics (how to measure)
-- ✓ Effort level (low/medium/high)
+Provide 8-10 specific, prioritized actions where EACH includes:
+- ✓ Data justification: "Your data shows [specific metric]..."
+- ✓ Research backing: "According to [Source Year], this tactic delivers..."
+- ✓ Exact implementation steps
+- ✓ Expected impact with reasoning (+X% based on [your gap] × [research multiplier])
+- ✓ Timeline and success metrics
+- ✓ Effort level
 
 ## 6. QUICK WINS (Implement This Week)
-- 3-4 changes that can be made immediately
-- Each with specific numbers and expected lift
+- 3-4 changes backed by YOUR data showing the opportunity
+- Each citing research supporting why it will work
+- Specific numbers and expected lift with calculation shown
 
 ## 7. EXPERIMENTATION ROADMAP
-- 3-5 A/B tests to run in next 30 days
-- Each test with hypothesis, variables, and success criteria
+- 3-5 A/B tests based on gaps/questions in YOUR data
+- Each with hypothesis supported by data observation
+- Variables and success criteria tied to YOUR current metrics
 
 ## 8. RISK FACTORS & WARNINGS
-- What could go wrong if current trends continue?
-- What opportunities are being missed?
-- What competitor strategies should be monitored?
+- What could go wrong? (Show with data trends)
+- What opportunities are being missed? (Quantify with your numbers)
+- What should be monitored? (Reference specific metrics from your data)
 
-Be extremely specific with numbers, percentages, and concrete examples.
-Think like a $500/hour marketing consultant - provide insights worth paying for.
+**REMEMBER:**
+- Zero generic advice - every sentence needs data or research citation
+- Format citations like: "According to Hootsuite's 2024 report..." or "Your data shows engagement dropped from X to Y..."
+- Calculate impact estimates: Don't just say "+20% engagement" - show "Your current 7.12% × 1.20 = 8.54% target"
+
 Focus EXCLUSIVELY on {description}.
 """
 
@@ -225,7 +239,14 @@ Focus EXCLUSIVELY on {description}.
                         "content": """You are an elite social media marketing strategist with 15+ years experience.
 You've managed accounts with millions of followers and consistently achieve 3-5x industry average engagement.
 You understand platform algorithms deeply and provide insights that directly impact business growth.
-Your recommendations are specific, actionable, and backed by data and psychology."""
+
+CRITICAL: Your recommendations are ALWAYS:
+1. Backed by specific numbers from the client's data (cite exact metrics)
+2. Supported by credible industry research (cite sources like "According to Hootsuite 2024...")
+3. Show calculations for impact estimates (e.g., "7.12% × 1.20 = 8.54%")
+4. Verifiable - another analyst should be able to check your sources
+
+You NEVER give vague or generic advice. Every insight must be evidence-based."""
                     },
                     {
                         "role": "user",
@@ -285,40 +306,55 @@ PLATFORM COMPARISON:
 
 Period: {START_DATE} to {END_DATE}
 
+**CRITICAL REQUIREMENTS:**
+1. EVERY claim MUST cite specific metrics from the data above (exact numbers, percentages)
+2. Industry comparisons MUST cite sources (e.g., "According to Rival IQ's 2024 Benchmark Report, industry average is X% vs our Y%")
+3. Growth projections MUST show the math (e.g., "Current 7.12% × projected 1.15 improvement = 8.19% target")
+4. NO generic statements - every sentence backed by data or research
+
+**GOOD EXAMPLE:** "Instagram engagement rate of 7.12% significantly exceeds Hootsuite's 2024 industry benchmark of 2.3% for similar-sized accounts, positioning us in the top 15% of performers."
+
+**BAD EXAMPLE:** "Performance has increased year-over-year" [NO NUMBERS, NO SOURCE]
+
 Create a COMPELLING, DATA-RICH executive summary (4-6 paragraphs):
 
 **Paragraph 1: Performance State & Context**
-- Overall performance assessment with year-over-year comparison
-- Market context and competitive positioning
-- Key metric highlights (reach, engagement, growth rate)
+- Overall performance with SPECIFIC metrics from your data
+- Benchmark against industry (cite source: "According to [Research] industry average is X%, we achieved Y%")
+- Key metric highlights with EXACT numbers from the data
 
 **Paragraph 2: Strategic Wins & Successes**
-- 3-4 major achievements with specific ROI/impact numbers
-- What strategies are working and why
-- Competitive advantages gained
+- 3-4 achievements with SPECIFIC metrics (cite exact numbers from data)
+- Why they're working (cite research/platform documentation if making claims)
+- Quantified competitive advantages
 
 **Paragraph 3: Critical Challenges & Gaps**
-- 2-3 underperforming areas with business impact
-- Root causes and missed opportunities
-- Risk factors if unaddressed
+- 2-3 underperforming areas with EXACT metrics showing the gap
+- Root causes backed by data patterns or cited research
+- Quantified risk (e.g., "missing X% of potential reach based on...")
 
 **Paragraph 4: Growth Trajectory & Trends**
-- Where performance is heading (up/down/stable)
-- Emerging patterns and their implications
-- Forecast for next quarter
+- Direction with SPECIFIC trend data (from X to Y over period)
+- Patterns citing actual metrics from the data
+- Forecast with calculation shown (current metric × expected change)
 
 **Paragraph 5: Strategic Imperatives**
-- Top 3 priorities for leadership focus
-- Resource allocation recommendations
-- Expected business outcomes
+- Top 3 priorities backed by data gaps identified above
+- Resource recommendations with expected ROI (cite similar case studies if available)
+- Expected outcomes with specific targets
 
 **Paragraph 6: Bottom Line**
-- Clear go/no-go on current strategy
-- Investment recommendations
-- Success metrics to track
+- Go/no-go based on specific performance thresholds
+- Investment recommendations tied to data-backed opportunities
+- Success metrics with specific targets (not vague)
+
+**REMEMBER:**
+- Every number must come from the data provided
+- Every industry comparison needs a cited source
+- Show your math for projections
+- Zero generic business speak without data backing
 
 Use executive language - strategic, outcome-focused, and financially aware.
-Include specific percentages, growth rates, and ROI implications.
 """
 
             response = self.client.chat.completions.create(
@@ -328,7 +364,15 @@ Include specific percentages, growth rates, and ROI implications.
                         "role": "system",
                         "content": """You are a seasoned Chief Marketing Officer with 20+ years experience.
 You've presented to hundreds of boards and know how to communicate marketing performance in business terms.
-You connect social media metrics to revenue, brand value, and competitive advantage."""
+You connect social media metrics to revenue, brand value, and competitive advantage.
+
+CRITICAL: Boards expect evidence-based reporting. Every statement must:
+1. Cite specific metrics from the data (exact numbers, not ranges)
+2. Benchmark against industry with sources (e.g., "vs Rival IQ's 2024 benchmark of X%")
+3. Show calculations for projections (current × expected change = target)
+4. Be fact-checkable - no unsupported claims
+
+Generic business language without data backing will be questioned. Be precise and cite sources."""
                     },
                     {
                         "role": "user",
@@ -376,99 +420,132 @@ You connect social media metrics to revenue, brand value, and competitive advant
 COMPLETE PERFORMANCE ANALYSIS:
 {context_text}
 
+**CRITICAL REQUIREMENTS - READ CAREFULLY:**
+1. EVERY action MUST be justified by SPECIFIC data from the analysis (e.g., "Your data shows posts get 7.12% vs reels 5.94%, so...")
+2. EVERY tactic MUST cite credible research (e.g., "According to Buffer's 2024 Study of 50K posts...", "Meta's 2024 Algorithm Update states...")
+3. EVERY impact estimate MUST show the calculation (e.g., "Current 7.12% × 1.20 improvement = 8.54% target")
+4. NO GENERIC TACTICS - Each must be tied to a specific gap/opportunity in THEIR data
+5. When recommending posting times, tools, or strategies - cite the source of that recommendation
+
+**GOOD EXAMPLE:** "Your data shows Reels underperform posts by 16.5% (5.94% vs 7.12%). According to Later's 2024 analysis of 5M Reels, adding captions increases engagement by 23%. Implement captions on all Reels → Expected: 5.94% × 1.23 = 7.31% target."
+
+**BAD EXAMPLE:** "Optimize posting schedule. Post during peak times for better reach." [NO DATA REFERENCE, NO SOURCE, NO CALCULATION]
+
 Create an EXTENSIVE, IMPLEMENTATION-READY strategic action plan:
 
 ## IMMEDIATE ACTIONS (This Week - Days 1-7)
-Provide 4-6 quick wins with:
+Provide 4-6 quick wins where EACH includes:
+- ✓ Data justification: "Your data shows [specific metric/gap]..."
+- ✓ Research backing: "According to [Source Year], this delivers [specific result]..."
 - ✓ Exact action steps (numbered, specific)
-- ✓ Who should do it (role/person)
-- ✓ Expected impact (+X% reach/engagement)
-- ✓ Time required (hours/days)
+- ✓ Who should do it (role)
+- ✓ Expected impact with calculation shown
+- ✓ Time required
 - ✓ Resources needed
-- ✓ Success metric (how to measure)
-- ✓ Risk level (low/medium/high)
+- ✓ Success metric (specific number to hit)
+- ✓ Risk level
 
 ## SHORT-TERM PRIORITIES (This Month - Weeks 2-4)
-Provide 6-8 high-impact initiatives with:
+Provide 6-8 high-impact initiatives where EACH includes:
+- ✓ Data-backed rationale (cite specific metrics from their analysis)
+- ✓ Research support (cite studies showing this works)
 - ✓ Detailed implementation roadmap
 - ✓ Week-by-week timeline
 - ✓ Content requirements
 - ✓ Team resources needed
-- ✓ Budget estimate (if applicable)
-- ✓ Success criteria (specific numbers)
+- ✓ Budget estimate with ROI calculation
+- ✓ Success criteria (specific numbers based on current metrics)
 - ✓ Contingency plans
 
 ## MEDIUM-TERM STRATEGY (Next Quarter - Months 2-3)
-Provide 4-6 strategic initiatives with:
-- ✓ Strategic rationale (WHY this matters)
+Provide 4-6 strategic initiatives where EACH includes:
+- ✓ Strategic rationale citing gaps in THEIR data
+- ✓ Industry precedent (cite case studies/research)
 - ✓ Implementation phases
 - ✓ Resource allocation
-- ✓ Dependencies and prerequisites
-- ✓ Risk mitigation strategies
-- ✓ Expected ROI/impact
-- ✓ Key milestones
+- ✓ Dependencies
+- ✓ Risk mitigation
+- ✓ Expected ROI with calculation
+- ✓ Key milestones with target metrics
 
 ## REACH AMPLIFICATION PLAYBOOK
-Provide 8-10 specific tactics to increase reach by 30-50%:
-- Algorithm optimization strategies
-- Viral content frameworks
-- Cross-promotion tactics
-- Paid amplification opportunities
-- Influencer/partnership strategies
-- Platform-specific growth hacks
-- Content repurposing strategies
-- Audience expansion tactics
+Provide 8-10 specific tactics where EACH includes:
+- ✓ Current state from their data (e.g., "Your reach is X...")
+- ✓ Research backing (e.g., "According to Hootsuite 2024...")
+- ✓ Implementation specifics
+- ✓ Expected impact with math shown
+- ✓ Source citation
+
+Categories to cover:
+- Algorithm optimization (cite platform documentation)
+- Viral content frameworks (cite research)
+- Cross-promotion tactics (cite case studies)
+- Paid amplification (cite benchmark data)
+- Influencer strategies (cite ROI studies)
+- Platform-specific hacks (cite source)
+- Content repurposing (cite efficiency gains)
+- Audience expansion (cite growth data)
 
 ## CONTENT OPTIMIZATION FRAMEWORK
-- Content pillars and themes (with rationale)
-- Posting calendar structure
-- Content format mix (percentage breakdown)
-- Caption formulas that convert
-- Visual style guidelines
-- Hashtag strategy per content type
-- Call-to-action frameworks
+Based on THEIR content performance data:
+- Content pillars (backed by their top-performing content data)
+- Posting calendar (based on their actual timing data if available, or cite research)
+- Content format mix (based on their performance: X% posts vs Y% reels)
+- Caption formulas (cite copywriting research or case studies)
+- Visual guidelines (based on their best performers)
+- Hashtag strategy (based on their data + cite research like "RiteTag's 2024 study...")
+- CTA frameworks (cite conversion research)
 
 ## EXPERIMENTATION PROGRAM (30-Day Test Plan)
-For each experiment (provide 5-7):
-1. **Hypothesis**: What we're testing and why
-2. **Test Design**: Control vs variant
-3. **Variables**: What changes
-4. **Sample Size**: How many posts/days
-5. **Success Metrics**: What we measure
-6. **Decision Criteria**: When to scale/stop
-7. **Expected Learning**: What we'll discover
+For each experiment (provide 5-7), include:
+1. **Data Observation**: What gap/question in THEIR data sparked this
+2. **Hypothesis**: Specific claim backed by research (cite source)
+3. **Test Design**: Control vs variant (specific to their content)
+4. **Variables**: What changes
+5. **Sample Size**: How many (based on their posting frequency)
+6. **Success Metrics**: Tied to their current baseline
+7. **Decision Criteria**: Specific threshold (e.g., "If >8% engagement vs current 7.12%")
+8. **Research Basis**: Why we expect this to work (cite source)
 
 ## PERFORMANCE MONITORING DASHBOARD
-- Daily metrics to track
-- Weekly review checklist
-- Monthly performance indicators
-- Red flags and warning signs
-- Course correction triggers
+Based on THEIR key metrics:
+- Daily metrics (specific to their important KPIs)
+- Weekly review (based on their data patterns)
+- Monthly indicators (tied to their goals)
+- Red flags (specific thresholds based on their data)
+- Course correction triggers (quantified)
 
 ## RESOURCE REQUIREMENTS
-- Team time allocation
-- Tool/software needs
-- Content creation requirements
-- Budget recommendations
-- Training/upskilling needs
+Justified by scope of their opportunities:
+- Team time (estimated based on action plan above)
+- Tools (specific recommendations with why - cite reviews/comparisons)
+- Content needs (based on their posting frequency)
+- Budget (with ROI calc based on their current performance)
+- Training (specific skills needed, cite courses/resources)
 
 ## RISK MITIGATION & CONTINGENCIES
-- What could go wrong
-- Prevention strategies
-- Backup plans
-- Crisis response protocols
-- Competitive threats to monitor
+Based on THEIR specific situation:
+- Risks from their data trends (cite specific metrics)
+- Prevention (backed by research)
+- Backup plans (alternative tactics with sources)
+- Crisis protocols (industry best practices, cite source)
+- Competitive threats (based on their market position)
 
 ## SUCCESS MILESTONES (30/60/90 Days)
-- Week 4 targets (with numbers)
-- Week 8 targets (with numbers)
-- Week 12 targets (with numbers)
-- How to celebrate wins
-- When to pivot strategies
+Based on THEIR current metrics:
+- Week 4 targets (current X → target Y with calculation)
+- Week 8 targets (progressive improvement shown)
+- Week 12 targets (ambitious but data-backed)
+- Celebration criteria (specific achievements)
+- Pivot triggers (specific underperformance thresholds)
 
-Be EXTREMELY specific - provide actual numbers, exact steps, and detailed implementation guidance.
-Think like you're creating a playbook someone could execute without asking clarification questions.
-Make this worth $10,000 in consulting value.
+**REMEMBER - ABSOLUTE REQUIREMENTS:**
+- Every recommendation needs: Their data + Research citation + Math
+- No generic advice that could apply to any brand
+- Every number must be calculated from their baseline
+- Every tactic must cite why it works (research/case study)
+
+Make this worth $10,000 in consulting value - deeply customized to THEIR data.
 """
 
             response = self.client.chat.completions.create(
@@ -480,7 +557,15 @@ Make this worth $10,000 in consulting value.
 Your action plans are so detailed and effective that clients call them "growth bibles."
 You think in systems, frameworks, and repeatable processes.
 You provide implementation-level detail that eliminates guesswork.
-You've personally managed $50M+ in social media budgets and know what actually works."""
+You've personally managed $50M+ in social media budgets and know what actually works.
+
+CRITICAL: You NEVER give generic advice. Every single recommendation must be:
+1. Grounded in the client's specific data (cite exact metrics)
+2. Backed by credible research (cite source and year)
+3. Show your math for impact estimates
+4. So specific that another marketer could verify your sources
+
+You are known for recommendations that stand up to scrutiny because everything is evidence-based."""
                     },
                     {
                         "role": "user",
