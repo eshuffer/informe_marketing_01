@@ -178,7 +178,7 @@ def load_json(filepath: Path) -> Optional[Dict[str, Any]]:
     return None
 
 
-def get_date_range_params(start_date: str, end_date: str) -> Dict[str, str]:
+def get_date_range_params(start_date: str, end_date: str) -> Dict[str, Any]:
     """
     Create date range parameters for API requests
 
@@ -187,17 +187,16 @@ def get_date_range_params(start_date: str, end_date: str) -> Dict[str, str]:
         end_date: End date (YYYY-MM-DD)
 
     Returns:
-        Dictionary with date parameters
+        Dictionary with date parameters in YYYYMMDD integer format
     """
-    # Convert to ISO 8601 datetime format (add time component)
-    start_datetime = f"{start_date}T00:00:00"
-    end_datetime = f"{end_date}T23:59:59"
+    # Convert YYYY-MM-DD to YYYYMMDD integer format (as required by Metricool API)
+    start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+    end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+
+    start_int = int(start_dt.strftime('%Y%m%d'))
+    end_int = int(end_dt.strftime('%Y%m%d'))
 
     return {
-        'since': start_date,
-        'until': end_date,
-        'from': start_datetime,
-        'to': end_datetime,
-        'startDate': start_date,
-        'endDate': end_date
+        'start': start_int,
+        'end': end_int
     }
