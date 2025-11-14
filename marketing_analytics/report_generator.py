@@ -315,8 +315,8 @@ class MarkdownReportGenerator:
 
             # Show top 3
             output += f"#### 🥇 Top 3 {content_type_name}\n\n"
-            output += "| Rank | Engagement Rate | Reach | Interactions | vs Avg Engagement | vs Avg Reach |\n"
-            output += "|------|----------------|-------|--------------|-------------------|-------------|\n"
+            output += "| Rank | Engagement Rate | Reach | Interactions | vs Avg Engagement | vs Avg Reach | Link |\n"
+            output += "|------|----------------|-------|--------------|-------------------|-------------|------|\n"
 
             for i, post in enumerate(top_posts[:3], 1):
                 eng_rate = post.get('metric_value', 0)
@@ -334,18 +334,61 @@ class MarkdownReportGenerator:
                 # Medal emojis
                 medal = "🥇" if i == 1 else ("🥈" if i == 2 else "🥉")
 
-                output += f"| {medal} #{i} | {eng_rate:.2f}% | {reach:,} | {interactions:,} | {eng_diff_str} | {reach_diff_str} |\n"
+                # Create anchor ID for this post
+                anchor_id = f"post-{platform.lower().replace('_', '-')}-{i}"
+
+                # Create link - use external URL if available, otherwise link to detail section
+                if 'url' in post and post['url'] != 'N/A':
+                    link_text = "[🔗 View]"
+                    link_url = post['url']
+                    link_md = f"[🔗]({link_url})"
+                elif 'shortcode' in post and 'instagram' in platform.lower():
+                    # Construct Instagram URL from shortcode
+                    link_md = f"[🔗](https://www.instagram.com/p/{post['shortcode']}/)"
+                else:
+                    # Link to detail section within report
+                    link_md = f"[📝](#{anchor_id})"
+
+                output += f"| {medal} #{i} | {eng_rate:.2f}% | {reach:,} | {interactions:,} | {eng_diff_str} | {reach_diff_str} | {link_md} |\n"
 
             output += "\n"
 
-            # Show preview of top 3 if available
-            has_previews = any('preview' in post for post in top_posts[:3])
-            if has_previews:
-                output += "**Content Previews:**\n\n"
+            # Show detailed information for top 3
+            has_content = any('preview' in post or 'full_text' in post for post in top_posts[:3])
+            if has_content:
+                output += "**📋 Detailed Content Information:**\n\n"
                 for i, post in enumerate(top_posts[:3], 1):
-                    if 'preview' in post:
-                        medal = "🥇" if i == 1 else ("🥈" if i == 2 else "🥉")
-                        output += f"{medal} **#{i}:** *{post['preview']}*\n\n"
+                    medal = "🥇" if i == 1 else ("🥈" if i == 2 else "🥉")
+                    anchor_id = f"post-{platform.lower().replace('_', '-')}-{i}"
+
+                    # Add anchor for internal linking
+                    output += f'<a id="{anchor_id}"></a>\n\n'
+                    output += f"{medal} **Post #{i}**\n\n"
+
+                    # Add date if available
+                    if 'date' in post:
+                        output += f"- **Posted:** {post['date']}\n"
+
+                    # Add metrics
+                    eng_rate = post.get('metric_value', 0)
+                    reach = post.get('reach', 'N/A')
+                    interactions = post.get('interactions', 'N/A')
+                    output += f"- **Performance:** {eng_rate:.2f}% engagement | {reach:,} reach | {interactions:,} interactions\n" if isinstance(reach, (int, float)) and isinstance(interactions, (int, float)) else f"- **Performance:** {eng_rate:.2f}% engagement\n"
+
+                    # Add link if available
+                    if 'url' in post and post['url'] != 'N/A':
+                        output += f"- **Link:** [View Post]({post['url']})\n"
+                    elif 'shortcode' in post and 'instagram' in platform.lower():
+                        ig_url = f"https://www.instagram.com/p/{post['shortcode']}/"
+                        output += f"- **Link:** [View on Instagram]({ig_url})\n"
+
+                    # Add content
+                    if 'full_text' in post:
+                        output += f"\n**Content:**\n\n> {post['full_text'][:500]}\n\n"
+                    elif 'preview' in post:
+                        output += f"\n**Preview:**\n\n> {post['preview']}\n\n"
+
+                    output += "---\n\n"
 
             # Add period averages for reference
             output += f"**Period Averages for {content_type_name}:**\n"
