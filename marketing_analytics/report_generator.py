@@ -74,7 +74,7 @@ class MarkdownReportGenerator:
             # Appendix
             f.write(self._generate_appendix(analytics_data))
 
-        logger.info(f"✅ Report generated: {report_path}")
+        logger.info(f"Report generated: {report_path}")
         return report_path
 
     def _generate_header(self) -> str:
