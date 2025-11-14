@@ -156,22 +156,65 @@ class TopicBasedInsightsGenerator:
             if len(data_summary) > max_chars:
                 data_summary = data_summary[:max_chars] + "\n\n[Data truncated...]"
 
-            prompt = f"""You are an expert social media marketing analyst for {BRAND_NAME}.
+            prompt = f"""You are a world-class social media marketing strategist and growth expert for {BRAND_NAME}.
+You have deep expertise in social media algorithms, content strategy, audience psychology, and data-driven optimization.
 
-Analyze the following {topic_name.upper()} data from {START_DATE} to {END_DATE}:
+Analyze this {topic_name.upper()} data from {START_DATE} to {END_DATE}:
 
 {data_summary}
 
-Provide a detailed, actionable analysis covering:
+Provide an EXTENSIVE, GURU-LEVEL strategic analysis:
 
-1. **Key Findings** (3-5 specific observations with numbers)
-2. **What's Working Well** (2-3 highlights with evidence)
-3. **Areas for Improvement** (2-3 specific issues with data)
-4. **Actionable Recommendations** (3-5 specific, implementable actions)
-5. **Quick Wins** (1-2 things to do immediately)
+## 1. DEEP DATA ANALYSIS (Be exhaustive)
+- Identify 5-7 key patterns and insights from the numbers
+- What does this data reveal about audience behavior?
+- What hidden opportunities exist in the data?
+- Compare performance across different dimensions
 
-Be specific, use actual numbers from the data, and make recommendations actionable and concrete.
-Focus ONLY on {description}.
+## 2. STRATEGIC ASSESSMENT
+- What's working exceptionally well? (Provide 3-4 examples with evidence)
+- What's underperforming? (Identify 3-4 specific issues with root causes)
+- What trends are emerging over the time period?
+- How does this compare to industry benchmarks?
+
+## 3. ROOT CAUSE ANALYSIS
+- WHY are certain things performing well/poorly?
+- What psychological/algorithmic factors are at play?
+- What patterns connect high-performing content?
+- What mistakes are being repeated?
+
+## 4. REACH OPTIMIZATION STRATEGIES
+- Specific tactics to increase reach by 20-50%
+- Algorithm-friendly best practices for this platform
+- Content format optimization for maximum distribution
+- Timing and frequency strategies for reach
+
+## 5. COMPREHENSIVE ACTION PLAN
+Provide 8-10 specific, prioritized actions:
+
+For each action include:
+- ✓ Exact implementation steps (be specific!)
+- ✓ Expected impact (quantify: +X% reach, +Y% engagement)
+- ✓ Timeline (when to implement, how long to test)
+- ✓ Success metrics (how to measure)
+- ✓ Effort level (low/medium/high)
+
+## 6. QUICK WINS (Implement This Week)
+- 3-4 changes that can be made immediately
+- Each with specific numbers and expected lift
+
+## 7. EXPERIMENTATION ROADMAP
+- 3-5 A/B tests to run in next 30 days
+- Each test with hypothesis, variables, and success criteria
+
+## 8. RISK FACTORS & WARNINGS
+- What could go wrong if current trends continue?
+- What opportunities are being missed?
+- What competitor strategies should be monitored?
+
+Be extremely specific with numbers, percentages, and concrete examples.
+Think like a $500/hour marketing consultant - provide insights worth paying for.
+Focus EXCLUSIVELY on {description}.
 """
 
             response = self.client.chat.completions.create(
@@ -179,7 +222,10 @@ Focus ONLY on {description}.
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert social media marketing analyst who provides specific, data-driven insights."
+                        "content": """You are an elite social media marketing strategist with 15+ years experience.
+You've managed accounts with millions of followers and consistently achieve 3-5x industry average engagement.
+You understand platform algorithms deeply and provide insights that directly impact business growth.
+Your recommendations are specific, actionable, and backed by data and psychology."""
                     },
                     {
                         "role": "user",
@@ -187,7 +233,7 @@ Focus ONLY on {description}.
                     }
                 ],
                 temperature=OPENAI_TEMPERATURE,
-                max_tokens=1500
+                max_tokens=3000  # Increased for more detailed responses
             )
 
             return {
@@ -226,27 +272,53 @@ Focus ONLY on {description}.
             summary_stats = full_data.get('summary', {})
             platform_comparison = full_data.get('platform_comparison', {})
 
-            prompt = f"""You are a marketing executive creating a brief for C-level leadership.
+            prompt = f"""You are a CMO presenting to the CEO and board about {BRAND_NAME}'s social media performance.
 
-Based on the following detailed topic analyses for {BRAND_NAME} ({START_DATE} to {END_DATE}):
-
+COMPREHENSIVE ANALYSIS INSIGHTS:
 {insights_text}
 
-OVERVIEW STATS:
+OVERVIEW METRICS:
 {json.dumps(summary_stats, indent=2, default=str)}
 
 PLATFORM COMPARISON:
 {json.dumps(platform_comparison, indent=2, default=str)}
 
-Write a compelling 3-4 paragraph executive summary that:
+Period: {START_DATE} to {END_DATE}
 
-1. Opens with the overall performance state (great/good/needs attention)
-2. Highlights 2-3 biggest wins or achievements (with specific numbers)
-3. Identifies 1-2 critical areas needing attention
-4. Ends with the strategic direction forward
+Create a COMPELLING, DATA-RICH executive summary (4-6 paragraphs):
 
-Write for busy executives - be concise, impactful, and focus on business outcomes.
-Use specific numbers and avoid generic statements.
+**Paragraph 1: Performance State & Context**
+- Overall performance assessment with year-over-year comparison
+- Market context and competitive positioning
+- Key metric highlights (reach, engagement, growth rate)
+
+**Paragraph 2: Strategic Wins & Successes**
+- 3-4 major achievements with specific ROI/impact numbers
+- What strategies are working and why
+- Competitive advantages gained
+
+**Paragraph 3: Critical Challenges & Gaps**
+- 2-3 underperforming areas with business impact
+- Root causes and missed opportunities
+- Risk factors if unaddressed
+
+**Paragraph 4: Growth Trajectory & Trends**
+- Where performance is heading (up/down/stable)
+- Emerging patterns and their implications
+- Forecast for next quarter
+
+**Paragraph 5: Strategic Imperatives**
+- Top 3 priorities for leadership focus
+- Resource allocation recommendations
+- Expected business outcomes
+
+**Paragraph 6: Bottom Line**
+- Clear go/no-go on current strategy
+- Investment recommendations
+- Success metrics to track
+
+Use executive language - strategic, outcome-focused, and financially aware.
+Include specific percentages, growth rates, and ROI implications.
 """
 
             response = self.client.chat.completions.create(
@@ -254,7 +326,9 @@ Use specific numbers and avoid generic statements.
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a senior marketing executive who communicates clearly and strategically to C-level leadership."
+                        "content": """You are a seasoned Chief Marketing Officer with 20+ years experience.
+You've presented to hundreds of boards and know how to communicate marketing performance in business terms.
+You connect social media metrics to revenue, brand value, and competitive advantage."""
                     },
                     {
                         "role": "user",
@@ -262,7 +336,7 @@ Use specific numbers and avoid generic statements.
                     }
                 ],
                 temperature=OPENAI_TEMPERATURE,
-                max_tokens=800
+                max_tokens=1500  # Increased for longer executive summary
             )
 
             return {
@@ -297,31 +371,104 @@ Use specific numbers and avoid generic statements.
             if len(context_text) > max_chars:
                 context_text = context_text[:max_chars] + "\n\n[Context truncated...]"
 
-            prompt = f"""Based on all the analyses for {BRAND_NAME}, create a prioritized action plan.
+            prompt = f"""You are an elite growth marketing consultant hired by {BRAND_NAME} to create a comprehensive growth roadmap.
 
-CONTEXT FROM ALL ANALYSES:
+COMPLETE PERFORMANCE ANALYSIS:
 {context_text}
 
-Create a strategic action plan with:
+Create an EXTENSIVE, IMPLEMENTATION-READY strategic action plan:
 
-**IMMEDIATE ACTIONS (This Week)**
-- List 2-3 quick wins that can be implemented immediately
-- Each with expected impact
+## IMMEDIATE ACTIONS (This Week - Days 1-7)
+Provide 4-6 quick wins with:
+- ✓ Exact action steps (numbered, specific)
+- ✓ Who should do it (role/person)
+- ✓ Expected impact (+X% reach/engagement)
+- ✓ Time required (hours/days)
+- ✓ Resources needed
+- ✓ Success metric (how to measure)
+- ✓ Risk level (low/medium/high)
 
-**SHORT-TERM PRIORITIES (This Month)**
-- List 3-4 high-impact actions for the next 30 days
-- Each with clear success metrics
+## SHORT-TERM PRIORITIES (This Month - Weeks 2-4)
+Provide 6-8 high-impact initiatives with:
+- ✓ Detailed implementation roadmap
+- ✓ Week-by-week timeline
+- ✓ Content requirements
+- ✓ Team resources needed
+- ✓ Budget estimate (if applicable)
+- ✓ Success criteria (specific numbers)
+- ✓ Contingency plans
 
-**LONG-TERM STRATEGY (Next Quarter)**
-- List 2-3 strategic initiatives for sustained growth
-- Each with business justification
+## MEDIUM-TERM STRATEGY (Next Quarter - Months 2-3)
+Provide 4-6 strategic initiatives with:
+- ✓ Strategic rationale (WHY this matters)
+- ✓ Implementation phases
+- ✓ Resource allocation
+- ✓ Dependencies and prerequisites
+- ✓ Risk mitigation strategies
+- ✓ Expected ROI/impact
+- ✓ Key milestones
 
-For each recommendation:
-- Be specific and actionable
-- Include WHY it matters (with data)
-- Suggest HOW to measure success
+## REACH AMPLIFICATION PLAYBOOK
+Provide 8-10 specific tactics to increase reach by 30-50%:
+- Algorithm optimization strategies
+- Viral content frameworks
+- Cross-promotion tactics
+- Paid amplification opportunities
+- Influencer/partnership strategies
+- Platform-specific growth hacks
+- Content repurposing strategies
+- Audience expansion tactics
 
-Prioritize by impact and feasibility.
+## CONTENT OPTIMIZATION FRAMEWORK
+- Content pillars and themes (with rationale)
+- Posting calendar structure
+- Content format mix (percentage breakdown)
+- Caption formulas that convert
+- Visual style guidelines
+- Hashtag strategy per content type
+- Call-to-action frameworks
+
+## EXPERIMENTATION PROGRAM (30-Day Test Plan)
+For each experiment (provide 5-7):
+1. **Hypothesis**: What we're testing and why
+2. **Test Design**: Control vs variant
+3. **Variables**: What changes
+4. **Sample Size**: How many posts/days
+5. **Success Metrics**: What we measure
+6. **Decision Criteria**: When to scale/stop
+7. **Expected Learning**: What we'll discover
+
+## PERFORMANCE MONITORING DASHBOARD
+- Daily metrics to track
+- Weekly review checklist
+- Monthly performance indicators
+- Red flags and warning signs
+- Course correction triggers
+
+## RESOURCE REQUIREMENTS
+- Team time allocation
+- Tool/software needs
+- Content creation requirements
+- Budget recommendations
+- Training/upskilling needs
+
+## RISK MITIGATION & CONTINGENCIES
+- What could go wrong
+- Prevention strategies
+- Backup plans
+- Crisis response protocols
+- Competitive threats to monitor
+
+## SUCCESS MILESTONES (30/60/90 Days)
+- Week 4 targets (with numbers)
+- Week 8 targets (with numbers)
+- Week 12 targets (with numbers)
+- How to celebrate wins
+- When to pivot strategies
+
+Be EXTREMELY specific - provide actual numbers, exact steps, and detailed implementation guidance.
+Think like you're creating a playbook someone could execute without asking clarification questions.
+Make this worth $10,000 in consulting value.
 """
 
             response = self.client.chat.completions.create(
@@ -329,7 +476,11 @@ Prioritize by impact and feasibility.
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a strategic marketing consultant who creates clear, prioritized action plans."
+                        "content": """You are a legendary growth marketing consultant who has 10x'd dozens of brands.
+Your action plans are so detailed and effective that clients call them "growth bibles."
+You think in systems, frameworks, and repeatable processes.
+You provide implementation-level detail that eliminates guesswork.
+You've personally managed $50M+ in social media budgets and know what actually works."""
                     },
                     {
                         "role": "user",
@@ -337,7 +488,7 @@ Prioritize by impact and feasibility.
                     }
                 ],
                 temperature=OPENAI_TEMPERATURE,
-                max_tokens=1200
+                max_tokens=3500  # Maximum allowed for detailed recommendations
             )
 
             return {
@@ -365,4 +516,12 @@ Prioritize by impact and feasibility.
         input_cost = (tokens.get('prompt', 0) / 1_000_000) * 2.50
         output_cost = (tokens.get('completion', 0) / 1_000_000) * 10.00
 
-        return input_cost + output_cost
+        total_cost = input_cost + output_cost
+
+        # Log detailed breakdown
+        logger.info(f"  Cost breakdown:")
+        logger.info(f"    Input: {tokens.get('prompt', 0):,} tokens = ${input_cost:.4f}")
+        logger.info(f"    Output: {tokens.get('completion', 0):,} tokens = ${output_cost:.4f}")
+        logger.info(f"    Total: ${total_cost:.4f}")
+
+        return total_cost
