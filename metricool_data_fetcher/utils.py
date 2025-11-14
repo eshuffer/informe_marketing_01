@@ -14,12 +14,16 @@ from config.config import (
     REQUEST_TIMEOUT, MAX_RETRIES, RETRY_DELAY, RATE_LIMIT
 )
 
+# Create logs directory if it doesn't exist
+logs_dir = Path(__file__).parent / 'logs'
+logs_dir.mkdir(parents=True, exist_ok=True)
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/metricool_fetcher.log'),
+        logging.FileHandler(logs_dir / 'metricool_fetcher.log'),
         logging.StreamHandler()
     ]
 )
