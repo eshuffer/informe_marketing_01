@@ -96,18 +96,119 @@ class MetricoolDataFetcher:
                 self.fetched_data['brand_info'][filename] = data
 
     def fetch_analytics_timelines(self):
-        """Fetch timeline analytics - SKIPPED due to complex requirements"""
-        logger.info("Skipping timeline analytics (requires network-specific queries)")
-        # Timeline endpoint requires specific network and metric combinations
-        # This can be added later with proper parameter mapping
-        pass
+        """Fetch timeline analytics for Instagram and Facebook"""
+        logger.info("Fetching timeline analytics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        # Define metrics for Instagram
+        instagram_metrics = {
+            'posts_count': ('instagram', 'count', 'posts'),
+            'posts_interactions': ('instagram', 'interactions', 'posts'),
+            'posts_engagement': ('instagram', 'engagement', 'posts'),
+            'posts_reach': ('instagram', 'reach', 'posts'),
+            'posts_impressions': ('instagram', 'impressions', 'posts'),
+            'posts_likes': ('instagram', 'likes', 'posts'),
+            'posts_comments': ('instagram', 'comments', 'posts'),
+            'posts_saves': ('instagram', 'saves', 'posts'),
+            'reels_count': ('instagram', 'count', 'reels'),
+            'reels_likes': ('instagram', 'likes', 'reels'),
+            'reels_comments': ('instagram', 'comments', 'reels'),
+            'reels_engagement': ('instagram', 'engagement', 'reels'),
+            'reels_reach': ('instagram', 'reach', 'reels'),
+            'reels_videoviews': ('instagram', 'videoviews', 'reels'),
+        }
+
+        # Define metrics for Facebook
+        facebook_metrics = {
+            'posts_count': ('facebook', 'count', 'posts'),
+            'posts_interactions': ('facebook', 'interactions', 'posts'),
+            'posts_engagement': ('facebook', 'engagement', 'posts'),
+            'posts_impressions': ('facebook', 'impressions', 'posts'),
+            'posts_clicks': ('facebook', 'clicks', 'posts'),
+            'posts_comments': ('facebook', 'comments', 'posts'),
+            'posts_shares': ('facebook', 'shares', 'posts'),
+            'posts_reactions': ('facebook', 'reactions', 'posts'),
+            'reels_count': ('facebook', 'count', 'reels'),
+            'reels_engagement': ('facebook', 'engagement', 'reels'),
+            'page_likes': ('facebook', 'likes', 'account'),
+            'page_follows': ('facebook', 'pageFollows', 'account'),
+            'page_impressions': ('facebook', 'pageImpressions', 'account'),
+        }
+
+        # Fetch Instagram timelines
+        for metric_name, (network, metric, subject) in tqdm(instagram_metrics.items(), desc="Instagram Timelines"):
+            params = date_params.copy()
+            params['network'] = network
+            params['metric'] = metric
+            params['subject'] = subject
+
+            data = make_api_request(
+                '/v2/analytics/timelines',
+                params=params,
+                blog_id=self.blog_id
+            )
+            if data:
+                save_json(
+                    data,
+                    DATA_DIR / 'analytics' / 'timelines' / f'instagram_{metric_name}_timeline.json'
+                )
+
+        # Fetch Facebook timelines
+        for metric_name, (network, metric, subject) in tqdm(facebook_metrics.items(), desc="Facebook Timelines"):
+            params = date_params.copy()
+            params['network'] = network
+            params['metric'] = metric
+            params['subject'] = subject
+
+            data = make_api_request(
+                '/v2/analytics/timelines',
+                params=params,
+                blog_id=self.blog_id
+            )
+            if data:
+                save_json(
+                    data,
+                    DATA_DIR / 'analytics' / 'timelines' / f'facebook_{metric_name}_timeline.json'
+                )
 
     def fetch_analytics_aggregation(self):
-        """Fetch aggregated analytics - SKIPPED due to API requirements"""
-        logger.info("Skipping aggregation analytics (use platform-specific endpoints instead)")
-        # Aggregation endpoint has complex requirements
-        # Using platform-specific endpoints provides better data
-        pass
+        """Fetch aggregated analytics for Instagram and Facebook"""
+        logger.info("Fetching aggregation analytics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        # Define metrics for aggregation (total counts/sums for the period)
+        aggregation_metrics = {
+            # Instagram
+            'instagram_posts_interactions': ('instagram', 'interactions', 'posts'),
+            'instagram_posts_engagement': ('instagram', 'engagement', 'posts'),
+            'instagram_posts_reach': ('instagram', 'reach', 'posts'),
+            'instagram_reels_engagement': ('instagram', 'engagement', 'reels'),
+            'instagram_reels_reach': ('instagram', 'reach', 'reels'),
+            # Facebook
+            'facebook_posts_interactions': ('facebook', 'interactions', 'posts'),
+            'facebook_posts_engagement': ('facebook', 'engagement', 'posts'),
+            'facebook_posts_impressions': ('facebook', 'impressions', 'posts'),
+            'facebook_reels_engagement': ('facebook', 'engagement', 'reels'),
+        }
+
+        for metric_name, (network, metric, subject) in tqdm(aggregation_metrics.items(), desc="Aggregations"):
+            params = date_params.copy()
+            params['network'] = network
+            params['metric'] = metric
+            params['subject'] = subject
+
+            data = make_api_request(
+                '/v2/analytics/aggregation',
+                params=params,
+                blog_id=self.blog_id
+            )
+            if data:
+                save_json(
+                    data,
+                    DATA_DIR / 'analytics' / 'aggregations' / f'{metric_name}_aggregation.json'
+                )
 
     def fetch_instagram_analytics(self):
         """Fetch Instagram-specific analytics"""
@@ -161,9 +262,27 @@ class MetricoolDataFetcher:
                 )
 
     def fetch_linkedin_analytics(self):
-        """Fetch LinkedIn-specific analytics - SKIPPED (not connected)"""
-        logger.info("Skipping LinkedIn analytics (platform not connected)")
-        pass
+        """Fetch LinkedIn-specific analytics"""
+        logger.info("Fetching LinkedIn analytics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        endpoints = [
+            ('/v2/analytics/posts/linkedin', 'linkedin_posts.json'),
+            ('/v2/analytics/newsletters/linkedin', 'linkedin_newsletters.json'),
+        ]
+
+        for endpoint, filename in tqdm(endpoints, desc="LinkedIn Analytics"):
+            data = make_api_request(
+                endpoint,
+                params=date_params,
+                blog_id=self.blog_id
+            )
+            if data:
+                save_json(
+                    data,
+                    DATA_DIR / 'analytics' / 'linkedin' / filename
+                )
 
     def fetch_twitter_analytics(self):
         """Fetch Twitter/X-specific analytics - SKIPPED (not connected)"""
@@ -171,9 +290,21 @@ class MetricoolDataFetcher:
         pass
 
     def fetch_tiktok_analytics(self):
-        """Fetch TikTok-specific analytics - SKIPPED (not connected)"""
-        logger.info("Skipping TikTok analytics (platform not connected)")
-        pass
+        """Fetch TikTok-specific analytics"""
+        logger.info("Fetching TikTok analytics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        data = make_api_request(
+            '/v2/analytics/posts/tiktok',
+            params=date_params,
+            blog_id=self.blog_id
+        )
+        if data:
+            save_json(
+                data,
+                DATA_DIR / 'analytics' / 'tiktok' / 'tiktok_posts.json'
+            )
 
     def fetch_youtube_analytics(self):
         """Fetch YouTube-specific analytics - SKIPPED (not connected)"""
@@ -181,19 +312,55 @@ class MetricoolDataFetcher:
         pass
 
     def fetch_pinterest_analytics(self):
-        """Fetch Pinterest-specific analytics - SKIPPED (not connected)"""
-        logger.info("Skipping Pinterest analytics (platform not connected)")
-        pass
+        """Fetch Pinterest-specific analytics"""
+        logger.info("Fetching Pinterest analytics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        data = make_api_request(
+            '/v2/analytics/posts/pinterest',
+            params=date_params,
+            blog_id=self.blog_id
+        )
+        if data:
+            save_json(
+                data,
+                DATA_DIR / 'analytics' / 'pinterest' / 'pinterest_posts.json'
+            )
 
     def fetch_threads_analytics(self):
-        """Fetch Threads-specific analytics - SKIPPED (not connected)"""
-        logger.info("Skipping Threads analytics (platform not connected)")
-        pass
+        """Fetch Threads-specific analytics"""
+        logger.info("Fetching Threads analytics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        data = make_api_request(
+            '/v2/analytics/posts/threads',
+            params=date_params,
+            blog_id=self.blog_id
+        )
+        if data:
+            save_json(
+                data,
+                DATA_DIR / 'analytics' / 'threads' / 'threads_posts.json'
+            )
 
     def fetch_bluesky_analytics(self):
-        """Fetch Bluesky-specific analytics - SKIPPED (not connected)"""
-        logger.info("Skipping Bluesky analytics (platform not connected)")
-        pass
+        """Fetch Bluesky-specific analytics"""
+        logger.info("Fetching Bluesky analytics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        data = make_api_request(
+            '/v2/analytics/posts/bluesky',
+            params=date_params,
+            blog_id=self.blog_id
+        )
+        if data:
+            save_json(
+                data,
+                DATA_DIR / 'analytics' / 'bluesky' / 'bluesky_posts.json'
+            )
 
     def fetch_general_stats(self):
         """Fetch general statistics"""
@@ -282,6 +449,73 @@ class MetricoolDataFetcher:
                     DATA_DIR / 'stats' / f'{provider}_city.json'
                 )
 
+    def fetch_best_posting_times(self):
+        """Fetch best posting times for each platform"""
+        logger.info("Fetching best posting times...")
+
+        providers = ['instagram', 'facebook', 'linkedin', 'twitter', 'tiktok', 'pinterest', 'threads']
+
+        for provider in tqdm(providers, desc="Best Times"):
+            data = make_api_request(
+                f'/v2/scheduler/besttimes/{provider}',
+                blog_id=self.blog_id
+            )
+            if data:
+                save_json(
+                    data,
+                    DATA_DIR / 'analytics' / f'{provider}_best_times.json'
+                )
+
+    def fetch_traffic_sources(self):
+        """Fetch traffic source data for connected platforms"""
+        logger.info("Fetching traffic sources...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+        providers = ['instagram', 'facebook']
+
+        for provider in tqdm(providers, desc="Traffic Sources"):
+            data = make_api_request(
+                f'/stats/trafficsource/{provider}',
+                params=date_params,
+                blog_id=self.blog_id
+            )
+            if data:
+                save_json(
+                    data,
+                    DATA_DIR / 'stats' / f'{provider}_traffic_source.json'
+                )
+
+    def fetch_general_posts_stats(self):
+        """Fetch general posts statistics across all platforms"""
+        logger.info("Fetching general posts statistics...")
+
+        date_params = get_date_range_params(self.start_date, self.end_date)
+
+        data = make_api_request(
+            '/stats/posts',
+            params=date_params,
+            blog_id=self.blog_id
+        )
+        if data:
+            save_json(
+                data,
+                DATA_DIR / 'stats' / 'all_posts_stats.json'
+            )
+
+    def fetch_profile_sync_info(self):
+        """Fetch profile last sync information"""
+        logger.info("Fetching profile sync information...")
+
+        data = make_api_request(
+            '/profile/lastsyncs',
+            blog_id=self.blog_id
+        )
+        if data:
+            save_json(
+                data,
+                DATA_DIR / 'brand_info' / 'last_syncs.json'
+            )
+
     def fetch_scheduled_posts(self):
         """Fetch scheduled and library posts"""
         logger.info("Fetching scheduled posts...")
@@ -339,15 +573,42 @@ class MetricoolDataFetcher:
         logger.info("Fetching hashtag data...")
 
         # Get hashtag tracking sessions
-        data = make_api_request(
+        sessions_data = make_api_request(
             '/v2/hashtags-tracker/tracking-sessions',
             blog_id=self.blog_id
         )
-        if data:
+        if sessions_data:
             save_json(
-                data,
+                sessions_data,
                 DATA_DIR / 'analytics' / 'hashtag_tracking_sessions.json'
             )
+
+            # For each tracking session, get detailed data
+            if 'data' in sessions_data and isinstance(sessions_data['data'], list):
+                for session in tqdm(sessions_data['data'], desc="Hashtag Sessions"):
+                    session_id = session.get('id')
+                    if session_id:
+                        # Get consolidation data
+                        consolidation = make_api_request(
+                            f'/v2/hashtags-tracker/tracking-sessions/{session_id}/consolidations',
+                            blog_id=self.blog_id
+                        )
+                        if consolidation:
+                            save_json(
+                                consolidation,
+                                DATA_DIR / 'analytics' / 'hashtags' / f'session_{session_id}_consolidation.json'
+                            )
+
+                        # Get distribution data
+                        distribution = make_api_request(
+                            f'/v2/hashtags-tracker/tracking-sessions/{session_id}/distribution',
+                            blog_id=self.blog_id
+                        )
+                        if distribution:
+                            save_json(
+                                distribution,
+                                DATA_DIR / 'analytics' / 'hashtags' / f'session_{session_id}_distribution.json'
+                            )
 
     def fetch_smart_links(self):
         """Fetch smart links data"""
@@ -368,19 +629,43 @@ class MetricoolDataFetcher:
 
             # Get analytics for each link
             if 'data' in data and isinstance(data['data'], list):
-                for link in data['data']:
+                for link in tqdm(data['data'], desc="Smart Links Analytics"):
                     link_id = link.get('id')
                     if link_id:
                         # Timeline analytics
-                        analytics = make_api_request(
+                        timeline_analytics = make_api_request(
                             f'/v2/smart-links/links/{link_id}/analytics/timeline',
                             params=date_params,
                             blog_id=self.blog_id
                         )
-                        if analytics:
+                        if timeline_analytics:
                             save_json(
-                                analytics,
-                                DATA_DIR / 'analytics' / f'smart_link_{link_id}_timeline.json'
+                                timeline_analytics,
+                                DATA_DIR / 'analytics' / 'smart_links' / f'link_{link_id}_timeline.json'
+                            )
+
+                        # Buttons analytics
+                        buttons_analytics = make_api_request(
+                            f'/v2/smart-links/links/{link_id}/analytics/buttons',
+                            params=date_params,
+                            blog_id=self.blog_id
+                        )
+                        if buttons_analytics:
+                            save_json(
+                                buttons_analytics,
+                                DATA_DIR / 'analytics' / 'smart_links' / f'link_{link_id}_buttons.json'
+                            )
+
+                        # Images analytics
+                        images_analytics = make_api_request(
+                            f'/v2/smart-links/links/{link_id}/analytics/images',
+                            params=date_params,
+                            blog_id=self.blog_id
+                        )
+                        if images_analytics:
+                            save_json(
+                                images_analytics,
+                                DATA_DIR / 'analytics' / 'smart_links' / f'link_{link_id}_images.json'
                             )
 
     def fetch_all_data(self):
@@ -398,6 +683,7 @@ class MetricoolDataFetcher:
         try:
             # Fetch all data categories
             self.fetch_brand_info()
+            self.fetch_profile_sync_info()
             self.fetch_analytics_timelines()
             self.fetch_analytics_aggregation()
             self.fetch_instagram_analytics()
@@ -410,7 +696,10 @@ class MetricoolDataFetcher:
             self.fetch_threads_analytics()
             self.fetch_bluesky_analytics()
             self.fetch_general_stats()
+            self.fetch_general_posts_stats()
             self.fetch_demographic_data()
+            self.fetch_traffic_sources()
+            self.fetch_best_posting_times()
             self.fetch_scheduled_posts()
             self.fetch_media_library()
             self.fetch_hashtag_data()
