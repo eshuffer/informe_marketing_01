@@ -10,7 +10,10 @@ from typing import Dict, Any, List, Optional
 from tqdm import tqdm
 
 from config.config import (
-    METRICOOL_USER_ID, CLIENT_NAME, START_DATE, END_DATE
+    METRICOOL_USER_ID, CLIENT_NAME, START_DATE, END_DATE,
+    PLATFORMS_ENABLED, FETCH_TIMELINES, FETCH_AGGREGATIONS,
+    FETCH_DEMOGRAPHICS, FETCH_TRAFFIC_SOURCES, FETCH_BEST_TIMES,
+    FETCH_SMART_LINKS, FETCH_HASHTAG_TRACKER
 )
 from utils import make_api_request, save_json, get_date_range_params, get_timeline_date_params
 
@@ -29,6 +32,8 @@ class MetricoolDataFetcher:
         self.brand_name = CLIENT_NAME
         self.start_date = START_DATE
         self.end_date = END_DATE
+        self.connected_platforms = []  # Will be populated after detection
+        self.enabled_platforms = []    # Platforms both connected AND enabled in config
         self.fetched_data = {
             'brand_info': {},
             'analytics': {},
@@ -78,6 +83,93 @@ class MetricoolDataFetcher:
 
         logger.error("Failed to retrieve blog ID")
         return None
+
+    def detect_connected_platforms(self):
+        """Detect which platforms are connected to this brand"""
+        logger.info("Detecting connected platforms...")
+
+        # Get connected profiles
+        response = make_api_request('/admin/blog/profiles', blog_id=self.blog_id)
+
+        if not response:
+            logger.warning("Could not detect connected platforms")
+            return
+
+        # Parse response
+        profiles = response if isinstance(response, list) else response.get('data', [])
+
+        # Platform mapping (API field name -> platform name)
+        platform_map = {
+            'instagram': 'instagram',
+            'facebook': 'facebook',
+            'linkedin': 'linkedin',
+            'twitter': 'twitter',
+            'twitterConnection': 'twitter',
+            'tiktok': 'tiktok',
+            'youtube': 'youtube',
+            'pinterest': 'pinterest',
+            'threads': 'threads',
+            'bluesky': 'bluesky',
+        }
+
+        # Detect connected platforms from profiles
+        connected = set()
+        for profile in profiles:
+            for api_field, platform_name in platform_map.items():
+                # Check if field exists and is not null/empty
+                if profile.get(api_field):
+                    connected.add(platform_name)
+
+        self.connected_platforms = sorted(list(connected))
+
+        # Determine enabled platforms (connected AND enabled in config)
+        self.enabled_platforms = [
+            p for p in self.connected_platforms
+            if PLATFORMS_ENABLED.get(p, False)
+        ]
+
+        # Print platform status
+        print("\n" + "="*80)
+        print("PLATFORM AVAILABILITY FOR SATTVICA")
+        print("="*80)
+
+        if self.connected_platforms:
+            print("\n✅ CONNECTED PLATFORMS:")
+            for platform in self.connected_platforms:
+                enabled = PLATFORMS_ENABLED.get(platform, False)
+                status = "✓ ENABLED" if enabled else "✗ DISABLED IN CONFIG"
+                print(f"   • {platform.upper():15} - {status}")
+        else:
+            print("\n⚠️  No connected platforms detected")
+
+        # Show disabled platforms in config
+        disabled_in_config = [p for p, enabled in PLATFORMS_ENABLED.items() if not enabled]
+        if disabled_in_config:
+            print("\n⚠️  DISABLED IN CONFIG (will skip even if connected):")
+            for platform in disabled_in_config:
+                print(f"   • {platform.upper()}")
+
+        print("\n💡 PLATFORMS THAT WILL BE FETCHED:")
+        if self.enabled_platforms:
+            for platform in self.enabled_platforms:
+                print(f"   • {platform.upper()}")
+        else:
+            print("   None (all platforms disabled or not connected)")
+
+        print("\n📝 To enable/disable platforms, edit: config/config.py -> PLATFORMS_ENABLED")
+        print("="*80 + "\n")
+
+        # Save platform detection results
+        platform_status = {
+            'connected': self.connected_platforms,
+            'enabled_in_config': [p for p, e in PLATFORMS_ENABLED.items() if e],
+            'will_fetch': self.enabled_platforms,
+            'detection_time': datetime.now().isoformat()
+        }
+        save_json(
+            platform_status,
+            DATA_DIR / 'brand_info' / 'platform_status.json'
+        )
 
     def fetch_brand_info(self):
         """Fetch brand information and settings"""
@@ -680,30 +772,61 @@ class MetricoolDataFetcher:
             logger.error("Cannot proceed without blog ID")
             return False
 
+        # Detect connected platforms
+        self.detect_connected_platforms()
+
         try:
             # Fetch all data categories
             self.fetch_brand_info()
             self.fetch_profile_sync_info()
-            self.fetch_analytics_timelines()
-            self.fetch_analytics_aggregation()
-            self.fetch_instagram_analytics()
-            self.fetch_facebook_analytics()
-            self.fetch_linkedin_analytics()
-            self.fetch_twitter_analytics()
-            self.fetch_tiktok_analytics()
-            self.fetch_youtube_analytics()
-            self.fetch_pinterest_analytics()
-            self.fetch_threads_analytics()
-            self.fetch_bluesky_analytics()
+
+            # Timeline and aggregation analytics (if enabled)
+            if FETCH_TIMELINES:
+                self.fetch_analytics_timelines()
+            if FETCH_AGGREGATIONS:
+                self.fetch_analytics_aggregation()
+
+            # Platform-specific analytics (only for enabled platforms)
+            if 'instagram' in self.enabled_platforms:
+                self.fetch_instagram_analytics()
+            if 'facebook' in self.enabled_platforms:
+                self.fetch_facebook_analytics()
+            if 'linkedin' in self.enabled_platforms:
+                self.fetch_linkedin_analytics()
+            if 'twitter' in self.enabled_platforms:
+                self.fetch_twitter_analytics()
+            if 'tiktok' in self.enabled_platforms:
+                self.fetch_tiktok_analytics()
+            if 'youtube' in self.enabled_platforms:
+                self.fetch_youtube_analytics()
+            if 'pinterest' in self.enabled_platforms:
+                self.fetch_pinterest_analytics()
+            if 'threads' in self.enabled_platforms:
+                self.fetch_threads_analytics()
+            if 'bluesky' in self.enabled_platforms:
+                self.fetch_bluesky_analytics()
+
+            # General stats and posts
             self.fetch_general_stats()
             self.fetch_general_posts_stats()
-            self.fetch_demographic_data()
-            self.fetch_traffic_sources()
-            self.fetch_best_posting_times()
+
+            # Demographics and traffic (if enabled)
+            if FETCH_DEMOGRAPHICS:
+                self.fetch_demographic_data()
+            if FETCH_TRAFFIC_SOURCES:
+                self.fetch_traffic_sources()
+            if FETCH_BEST_TIMES:
+                self.fetch_best_posting_times()
+
+            # Content management
             self.fetch_scheduled_posts()
             self.fetch_media_library()
-            self.fetch_hashtag_data()
-            self.fetch_smart_links()
+
+            # Advanced analytics (if enabled)
+            if FETCH_HASHTAG_TRACKER:
+                self.fetch_hashtag_data()
+            if FETCH_SMART_LINKS:
+                self.fetch_smart_links()
 
             logger.info("=" * 60)
             logger.info("Data fetch completed successfully!")
