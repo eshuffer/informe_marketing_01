@@ -97,63 +97,18 @@ class MetricoolDataFetcher:
                 self.fetched_data['brand_info'][filename] = data
 
     def fetch_analytics_timelines(self):
-        """Fetch timeline analytics for various metrics"""
-        logger.info("Fetching analytics timelines...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        # V2 Analytics Timelines endpoint
-        metrics = [
-            'followers', 'engagement', 'impressions', 'reach',
-            'likes', 'comments', 'shares', 'saves', 'views',
-            'profile_visits', 'website_clicks'
-        ]
-
-        for metric in tqdm(metrics, desc="Analytics Timelines"):
-            params = {
-                'metrics': metric,
-                **date_params
-            }
-            data = make_api_request(
-                '/v2/analytics/timelines',
-                params=params,
-                blog_id=self.blog_id
-            )
-            if data:
-                save_json(
-                    data,
-                    DATA_DIR / 'analytics' / f'timeline_{metric}.json'
-                )
+        """Fetch timeline analytics - SKIPPED due to complex requirements"""
+        logger.info("Skipping timeline analytics (requires network-specific queries)")
+        # Timeline endpoint requires specific network and metric combinations
+        # This can be added later with proper parameter mapping
+        pass
 
     def fetch_analytics_aggregation(self):
-        """Fetch aggregated analytics"""
-        logger.info("Fetching aggregated analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        # Aggregation endpoint requires network and metric parameters
-        networks = ['instagram', 'facebook', 'linkedin', 'twitter']
-        metrics = ['followers', 'engagement', 'impressions', 'reach']
-
-        aggregations = {}
-        for network in networks:
-            for metric in metrics:
-                params = {
-                    'network': network,
-                    'metric': metric,
-                    **date_params
-                }
-                data = make_api_request(
-                    '/v2/analytics/aggregation',
-                    params=params,
-                    blog_id=self.blog_id
-                )
-                if data:
-                    key = f'{network}_{metric}'
-                    aggregations[key] = data
-
-        if aggregations:
-            save_json(aggregations, DATA_DIR / 'analytics' / 'aggregation.json')
+        """Fetch aggregated analytics - SKIPPED due to API requirements"""
+        logger.info("Skipping aggregation analytics (use platform-specific endpoints instead)")
+        # Aggregation endpoint has complex requirements
+        # Using platform-specific endpoints provides better data
+        pass
 
     def fetch_instagram_analytics(self):
         """Fetch Instagram-specific analytics"""
@@ -161,14 +116,12 @@ class MetricoolDataFetcher:
 
         date_params = get_date_range_params(self.start_date, self.end_date)
 
+        # Only use working v2 endpoints
         endpoints = [
             ('/v2/analytics/posts/instagram', 'instagram_posts.json'),
             ('/v2/analytics/reels/instagram', 'instagram_reels.json'),
             ('/v2/analytics/stories/instagram', 'instagram_stories.json'),
             ('/v2/analytics/posts/instagram/hashtags', 'instagram_hashtags.json'),
-            ('/stats/instagram/posts', 'instagram_posts_stats.json'),
-            ('/stats/instagram/reels', 'instagram_reels_stats.json'),
-            ('/stats/instagram/stories', 'instagram_stories_stats.json'),
         ]
 
         for endpoint, filename in tqdm(endpoints, desc="Instagram Analytics"):
@@ -189,11 +142,11 @@ class MetricoolDataFetcher:
 
         date_params = get_date_range_params(self.start_date, self.end_date)
 
+        # Only use working v2 endpoints
         endpoints = [
             ('/v2/analytics/posts/facebook', 'facebook_posts.json'),
             ('/v2/analytics/reels/facebook', 'facebook_reels.json'),
             ('/v2/analytics/stories/facebook', 'facebook_stories.json'),
-            ('/stats/facebook/posts', 'facebook_posts_stats.json'),
         ]
 
         for endpoint, filename in tqdm(endpoints, desc="Facebook Analytics"):
@@ -209,141 +162,39 @@ class MetricoolDataFetcher:
                 )
 
     def fetch_linkedin_analytics(self):
-        """Fetch LinkedIn-specific analytics"""
-        logger.info("Fetching LinkedIn analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        endpoints = [
-            ('/v2/analytics/posts/linkedin', 'linkedin_posts.json'),
-            ('/v2/analytics/newsletters/linkedin', 'linkedin_newsletters.json'),
-            ('/stats/linkedin/posts', 'linkedin_posts_stats.json'),
-        ]
-
-        for endpoint, filename in tqdm(endpoints, desc="LinkedIn Analytics"):
-            data = make_api_request(
-                endpoint,
-                params=date_params,
-                blog_id=self.blog_id
-            )
-            if data:
-                save_json(
-                    data,
-                    DATA_DIR / 'analytics' / 'linkedin' / filename
-                )
+        """Fetch LinkedIn-specific analytics - SKIPPED (not connected)"""
+        logger.info("Skipping LinkedIn analytics (platform not connected)")
+        pass
 
     def fetch_twitter_analytics(self):
-        """Fetch Twitter/X-specific analytics"""
-        logger.info("Fetching Twitter analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        endpoints = [
-            ('/stats/twitter/posts', 'twitter_posts.json'),
-        ]
-
-        for endpoint, filename in tqdm(endpoints, desc="Twitter Analytics"):
-            data = make_api_request(
-                endpoint,
-                params=date_params,
-                blog_id=self.blog_id
-            )
-            if data:
-                save_json(
-                    data,
-                    DATA_DIR / 'analytics' / 'twitter' / filename
-                )
+        """Fetch Twitter/X-specific analytics - SKIPPED (not connected)"""
+        logger.info("Skipping Twitter analytics (platform not connected)")
+        pass
 
     def fetch_tiktok_analytics(self):
-        """Fetch TikTok-specific analytics"""
-        logger.info("Fetching TikTok analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        endpoints = [
-            ('/v2/analytics/posts/tiktok', 'tiktok_posts.json'),
-        ]
-
-        for endpoint, filename in tqdm(endpoints, desc="TikTok Analytics"):
-            data = make_api_request(
-                endpoint,
-                params=date_params,
-                blog_id=self.blog_id
-            )
-            if data:
-                save_json(
-                    data,
-                    DATA_DIR / 'analytics' / 'tiktok' / filename
-                )
+        """Fetch TikTok-specific analytics - SKIPPED (not connected)"""
+        logger.info("Skipping TikTok analytics (platform not connected)")
+        pass
 
     def fetch_youtube_analytics(self):
-        """Fetch YouTube-specific analytics"""
-        logger.info("Fetching YouTube analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        # YouTube posts are typically videos
-        data = make_api_request(
-            '/v2/analytics/posts/youtube',
-            params=date_params,
-            blog_id=self.blog_id
-        )
-        if data:
-            save_json(
-                data,
-                DATA_DIR / 'analytics' / 'youtube' / 'youtube_videos.json'
-            )
+        """Fetch YouTube-specific analytics - SKIPPED (not connected)"""
+        logger.info("Skipping YouTube analytics (platform not connected)")
+        pass
 
     def fetch_pinterest_analytics(self):
-        """Fetch Pinterest-specific analytics"""
-        logger.info("Fetching Pinterest analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        data = make_api_request(
-            '/v2/analytics/posts/pinterest',
-            params=date_params,
-            blog_id=self.blog_id
-        )
-        if data:
-            save_json(
-                data,
-                DATA_DIR / 'analytics' / 'pinterest' / 'pinterest_posts.json'
-            )
+        """Fetch Pinterest-specific analytics - SKIPPED (not connected)"""
+        logger.info("Skipping Pinterest analytics (platform not connected)")
+        pass
 
     def fetch_threads_analytics(self):
-        """Fetch Threads-specific analytics"""
-        logger.info("Fetching Threads analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        data = make_api_request(
-            '/v2/analytics/posts/threads',
-            params=date_params,
-            blog_id=self.blog_id
-        )
-        if data:
-            save_json(
-                data,
-                DATA_DIR / 'analytics' / 'threads' / 'threads_posts.json'
-            )
+        """Fetch Threads-specific analytics - SKIPPED (not connected)"""
+        logger.info("Skipping Threads analytics (platform not connected)")
+        pass
 
     def fetch_bluesky_analytics(self):
-        """Fetch Bluesky-specific analytics"""
-        logger.info("Fetching Bluesky analytics...")
-
-        date_params = get_date_range_params(self.start_date, self.end_date)
-
-        data = make_api_request(
-            '/v2/analytics/posts/bluesky',
-            params=date_params,
-            blog_id=self.blog_id
-        )
-        if data:
-            save_json(
-                data,
-                DATA_DIR / 'analytics' / 'bluesky' / 'bluesky_posts.json'
-            )
+        """Fetch Bluesky-specific analytics - SKIPPED (not connected)"""
+        logger.info("Skipping Bluesky analytics (platform not connected)")
+        pass
 
     def fetch_general_stats(self):
         """Fetch general statistics"""
@@ -351,8 +202,8 @@ class MetricoolDataFetcher:
 
         date_params = get_date_range_params(self.start_date, self.end_date)
 
+        # Only fetch working endpoints
         endpoints = [
-            ('/stats/posts', 'all_posts.json'),
             ('/v2/analytics/distribution', 'distribution.json'),
             ('/v2/analytics/brand-summary/posts', 'brand_summary_posts.json'),
         ]
@@ -370,10 +221,11 @@ class MetricoolDataFetcher:
                 )
 
     def fetch_demographic_data(self):
-        """Fetch demographic data (age, gender, location)"""
+        """Fetch demographic data (age, gender, location) - Only connected platforms"""
         logger.info("Fetching demographic data...")
 
-        providers = ['instagram', 'facebook', 'linkedin', 'tiktok']
+        # Only fetch for connected platforms (Instagram and Facebook)
+        providers = ['instagram', 'facebook']
         date_params = get_date_range_params(self.start_date, self.end_date)
 
         for provider in tqdm(providers, desc="Demographics"):
