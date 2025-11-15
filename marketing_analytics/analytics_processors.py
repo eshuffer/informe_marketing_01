@@ -246,8 +246,15 @@ class ContentPerformanceAnalyzer:
 
     @staticmethod
     def find_top_performing_content(posts_df: pd.DataFrame, metric: str = 'engagement_rate',
-                                   top_n: int = 10) -> List[Dict[str, Any]]:
-        """Find top performing content by metric"""
+                                   top_n: int = 10, content_type: str = None) -> List[Dict[str, Any]]:
+        """Find top performing content by metric
+
+        Args:
+            posts_df: DataFrame containing posts data
+            metric: Metric to sort by (default: 'engagement_rate')
+            top_n: Number of top posts to return
+            content_type: Type of content ('posts', 'reels', 'stories') - used for labeling
+        """
         if posts_df is None or posts_df.empty:
             return []
 
@@ -272,7 +279,29 @@ class ContentPerformanceAnalyzer:
                 'interactions': post.get('interactions', 'N/A'),
                 'likes': post.get('likes', 'N/A'),
                 'comments': post.get('comments', 'N/A'),
+                'shares': post.get('shares', 'N/A'),
+                'saves': post.get('saves', 'N/A'),
             }
+
+            # Add content type if provided
+            if content_type:
+                result['content_type'] = content_type.capitalize()
+            else:
+                # Try to infer from data
+                type_fields = ['type', 'postType', 'post_type', 'contentType', 'mediaType']
+                for field in type_fields:
+                    if field in post and pd.notna(post[field]):
+                        result['content_type'] = str(post[field]).capitalize()
+                        break
+                if 'content_type' not in result:
+                    result['content_type'] = 'Post'
+
+            # Add title if available
+            title_fields = ['title', 'name', 'headline']
+            for field in title_fields:
+                if field in post and pd.notna(post[field]):
+                    result['title'] = str(post[field])
+                    break
 
             # Add post ID/permalink/URL if available
             id_fields = ['id', 'postId', 'post_id', 'shortcode', 'permalink', 'url', 'link']
@@ -296,15 +325,28 @@ class ContentPerformanceAnalyzer:
             text_fields = ['text', 'caption', 'description', 'message']
             for field in text_fields:
                 if field in post and pd.notna(post[field]):
-                    result['preview'] = str(post[field])[:150] + '...'
-                    result['full_text'] = str(post[field])  # Keep full text for detailed view
+                    text_content = str(post[field])
+                    result['preview'] = text_content[:150] + ('...' if len(text_content) > 150 else '')
+                    result['full_text'] = text_content  # Keep full text for detailed view
+                    # If no title was found, use first line as title
+                    if 'title' not in result:
+                        first_line = text_content.split('\n')[0]
+                        if first_line:
+                            result['title'] = first_line[:80] + ('...' if len(first_line) > 80 else '')
                     break
 
             # Add date if available
-            date_fields = ['publishDate', 'date', 'createdAt']
+            date_fields = ['publishDate', 'date', 'createdAt', 'created_at']
             for field in date_fields:
                 if field in post and pd.notna(post[field]):
                     result['date'] = str(post[field])
+                    break
+
+            # Add media type if available
+            media_fields = ['mediaType', 'media_type', 'format']
+            for field in media_fields:
+                if field in post and pd.notna(post[field]):
+                    result['media_type'] = str(post[field])
                     break
 
             results.append(result)

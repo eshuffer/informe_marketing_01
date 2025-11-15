@@ -180,7 +180,7 @@ class MarketingAnalytics:
             posts_df = self.loader.get_posts_dataframe(platform, 'posts')
             if posts_df is not None:
                 top_posts = self.content_analyzer.find_top_performing_content(
-                    posts_df, metric='engagement_rate', top_n=10
+                    posts_df, metric='engagement_rate', top_n=10, content_type='posts'
                 )
                 if top_posts:
                     # Use key format: "Instagram_Posts" to match engagement section keys
@@ -191,12 +191,23 @@ class MarketingAnalytics:
             reels_df = self.loader.get_posts_dataframe(platform, 'reels')
             if reels_df is not None:
                 top_reels = self.content_analyzer.find_top_performing_content(
-                    reels_df, metric='engagement_rate', top_n=10
+                    reels_df, metric='engagement_rate', top_n=10, content_type='reels'
                 )
                 if top_reels:
                     # Use key format: "Instagram_Reels" to match engagement section keys
                     key = f"{platform.title()}_Reels"
                     top_content[key] = top_reels
+
+            # Get top stories (if available)
+            stories_df = self.loader.get_posts_dataframe(platform, 'stories')
+            if stories_df is not None:
+                top_stories = self.content_analyzer.find_top_performing_content(
+                    stories_df, metric='engagement_rate', top_n=10, content_type='stories'
+                )
+                if top_stories:
+                    # Use key format: "Instagram_Stories" to match engagement section keys
+                    key = f"{platform.title()}_Stories"
+                    top_content[key] = top_stories
 
         if top_content:
             content_results['top_content'] = top_content

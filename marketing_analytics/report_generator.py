@@ -416,21 +416,39 @@ class MarkdownReportGenerator:
 
             # Show top 3
             output += f"#### 🥇 Top 3 {content_type_name}\n\n"
-            output += "| Rank | Engagement Rate | Reach | Interactions | vs Avg Engagement | vs Avg Reach | Link |\n"
-            output += "|------|----------------|-------|--------------|-------------------|-------------|------|\n"
+            output += "| Rank | Title | Date | Type | Engagement | Reach | Interactions | vs Avg Eng | Link |\n"
+            output += "|------|-------|------|------|------------|-------|--------------|------------|------|\n"
 
             for i, post in enumerate(top_posts[:3], 1):
                 eng_rate = post.get('metric_value', 0)
                 reach = post.get('reach', 0) if isinstance(post.get('reach'), (int, float)) else 0
                 interactions = post.get('interactions', 0) if isinstance(post.get('interactions'), (int, float)) else 0
 
+                # Get title (truncate if too long)
+                title = post.get('title', 'Untitled')
+                if len(title) > 50:
+                    title = title[:47] + "..."
+
+                # Get date (format nicely)
+                date_str = post.get('date', 'N/A')
+                if date_str != 'N/A' and len(date_str) > 10:
+                    # Try to format date nicely (YYYY-MM-DD HH:MM -> MM/DD)
+                    try:
+                        date_str = date_str[:10]  # Get just YYYY-MM-DD part
+                        parts = date_str.split('-')
+                        if len(parts) == 3:
+                            date_str = f"{parts[1]}/{parts[2]}"  # MM/DD
+                    except:
+                        pass
+
+                # Get content type
+                content_type_display = post.get('content_type', content_type_name)
+
                 # Calculate differences
                 eng_diff = ((eng_rate - comparison_avg_engagement) / comparison_avg_engagement * 100) if comparison_avg_engagement > 0 else 0
-                reach_diff = ((reach - comparison_avg_reach) / comparison_avg_reach * 100) if comparison_avg_reach > 0 else 0
 
                 # Format differences with + or -
                 eng_diff_str = f"+{eng_diff:.1f}%" if eng_diff >= 0 else f"{eng_diff:.1f}%"
-                reach_diff_str = f"+{reach_diff:.1f}%" if reach_diff >= 0 else f"{reach_diff:.1f}%"
 
                 # Medal emojis
                 medal = "🥇" if i == 1 else ("🥈" if i == 2 else "🥉")
@@ -440,9 +458,7 @@ class MarkdownReportGenerator:
 
                 # Create link - use external URL if available, otherwise link to detail section
                 if 'url' in post and post['url'] != 'N/A':
-                    link_text = "[🔗 View]"
-                    link_url = post['url']
-                    link_md = f"[🔗]({link_url})"
+                    link_md = f"[🔗]({post['url']})"
                 elif 'shortcode' in post and 'instagram' in platform.lower():
                     # Construct Instagram URL from shortcode
                     link_md = f"[🔗](https://www.instagram.com/p/{post['shortcode']}/)"
@@ -450,7 +466,7 @@ class MarkdownReportGenerator:
                     # Link to detail section within report
                     link_md = f"[📝](#{anchor_id})"
 
-                output += f"| {medal} #{i} | {eng_rate:.2f}% | {reach:,} | {interactions:,} | {eng_diff_str} | {reach_diff_str} | {link_md} |\n"
+                output += f"| {medal} #{i} | {title} | {date_str} | {content_type_display} | {eng_rate:.2f}% | {reach:,} | {interactions:,} | {eng_diff_str} | {link_md} |\n"
 
             output += "\n"
 
@@ -464,17 +480,48 @@ class MarkdownReportGenerator:
 
                     # Add anchor for internal linking
                     output += f'<a id="{anchor_id}"></a>\n\n'
-                    output += f"{medal} **Post #{i}**\n\n"
+
+                    # Title with content type indicator
+                    content_type_display = post.get('content_type', content_type_name)
+                    title = post.get('title', f'Post #{i}')
+                    output += f"{medal} **{title}** ({content_type_display})\n\n"
 
                     # Add date if available
                     if 'date' in post:
                         output += f"- **Posted:** {post['date']}\n"
 
-                    # Add metrics
+                    # Add title if separate from above
+                    if 'title' in post and post.get('title') != title:
+                        output += f"- **Title:** {post['title']}\n"
+
+                    # Add comprehensive metrics
                     eng_rate = post.get('metric_value', 0)
                     reach = post.get('reach', 'N/A')
                     interactions = post.get('interactions', 'N/A')
-                    output += f"- **Performance:** {eng_rate:.2f}% engagement | {reach:,} reach | {interactions:,} interactions\n" if isinstance(reach, (int, float)) and isinstance(interactions, (int, float)) else f"- **Performance:** {eng_rate:.2f}% engagement\n"
+                    likes = post.get('likes', 'N/A')
+                    comments = post.get('comments', 'N/A')
+                    shares = post.get('shares', 'N/A')
+                    saves = post.get('saves', 'N/A')
+
+                    output += f"- **Engagement Rate:** {eng_rate:.2f}%\n"
+                    if isinstance(reach, (int, float)) and reach != 'N/A':
+                        output += f"- **Reach:** {reach:,}\n"
+                    if isinstance(interactions, (int, float)) and interactions != 'N/A':
+                        output += f"- **Total Interactions:** {interactions:,}\n"
+
+                    # Detailed metrics breakdown
+                    metrics_line = []
+                    if isinstance(likes, (int, float)) and likes != 'N/A' and likes > 0:
+                        metrics_line.append(f"❤️ {likes:,} likes")
+                    if isinstance(comments, (int, float)) and comments != 'N/A' and comments > 0:
+                        metrics_line.append(f"💬 {comments:,} comments")
+                    if isinstance(shares, (int, float)) and shares != 'N/A' and shares > 0:
+                        metrics_line.append(f"🔄 {shares:,} shares")
+                    if isinstance(saves, (int, float)) and saves != 'N/A' and saves > 0:
+                        metrics_line.append(f"🔖 {saves:,} saves")
+
+                    if metrics_line:
+                        output += f"- **Details:** {' | '.join(metrics_line)}\n"
 
                     # Add link if available
                     if 'url' in post and post['url'] != 'N/A':
@@ -485,9 +532,12 @@ class MarkdownReportGenerator:
 
                     # Add content
                     if 'full_text' in post:
-                        output += f"\n**Content:**\n\n> {post['full_text'][:500]}\n\n"
+                        full_text = post['full_text']
+                        output += f"\n**Caption:**\n\n> {full_text[:500]}\n\n"
+                        if len(full_text) > 500:
+                            output += f"*[Caption truncated - {len(full_text)} characters total]*\n\n"
                     elif 'preview' in post:
-                        output += f"\n**Preview:**\n\n> {post['preview']}\n\n"
+                        output += f"\n**Caption Preview:**\n\n> {post['preview']}\n\n"
 
                     output += "---\n\n"
 
