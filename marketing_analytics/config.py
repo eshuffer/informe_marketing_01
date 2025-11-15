@@ -26,6 +26,7 @@ ENABLED_PLATFORMS = ['instagram', 'facebook']
 
 # Report Settings
 REPORT_FORMAT = "markdown"  # Options: markdown, html, json
+REPORT_LANGUAGE = "es"  # Options: en (English), es (Spanish)
 INCLUDE_AI_INSIGHTS = True
 INCLUDE_VISUALIZATIONS = True
 

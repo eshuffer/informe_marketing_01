@@ -14,7 +14,8 @@ from config import (
     OPENAI_TEMPERATURE,
     BRAND_NAME,
     START_DATE,
-    END_DATE
+    END_DATE,
+    REPORT_LANGUAGE
 )
 
 logger = logging.getLogger(__name__)
@@ -23,12 +24,14 @@ logger = logging.getLogger(__name__)
 class TopicBasedInsightsGenerator:
     """Generate deep insights by analyzing data topics separately"""
 
-    def __init__(self, api_key: str = OPENAI_API_KEY):
+    def __init__(self, api_key: str = OPENAI_API_KEY, language: str = REPORT_LANGUAGE):
         if not api_key:
             logger.warning("OpenAI API key not set. AI insights will be disabled.")
             self.client = None
         else:
             self.client = OpenAI(api_key=api_key)
+
+        self.language = language
 
         # Define analysis phases and topics
         self.enable_data_consolidation = True  # Phase 1: Data consolidation
@@ -62,6 +65,29 @@ class TopicBasedInsightsGenerator:
                 'data_keys': ['platform_comparison', 'engagement', 'enhanced_content']
             }
         }
+
+    def _prepare_prompt(self, prompt: str) -> str:
+        """
+        Prepare prompt with language-specific instructions
+
+        Args:
+            prompt: The original English prompt
+
+        Returns:
+            Prompt with language wrapper if needed
+        """
+        if self.language == 'es':
+            spanish_instruction = """INSTRUCCIONES IMPORTANTES:
+- Responde COMPLETAMENTE en español
+- Mantén todos los números, porcentajes y métricas exactamente como se proporcionan
+- Traduce todos los encabezados, títulos y texto
+- Usa terminología de marketing en español (engagement, alcance, interacciones, etc.)
+- Mantén el formato Markdown
+- Cita las fuentes en inglés pero explica en español
+
+"""
+            return spanish_instruction + prompt
+        return prompt
 
     def generate_all_topic_insights(self, analytics_data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate insights for all topics using 12-request enhanced architecture"""
@@ -330,7 +356,7 @@ You NEVER give vague or generic advice. Every insight must be evidence-based."""
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=OPENAI_TEMPERATURE,
@@ -456,7 +482,7 @@ Generic business language without data backing will be questioned. Be precise an
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=OPENAI_TEMPERATURE,
@@ -649,7 +675,7 @@ You are known for recommendations that stand up to scrutiny because everything i
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=OPENAI_TEMPERATURE,
@@ -737,7 +763,7 @@ Create a comprehensive reference that subsequent analysis can cite."""
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=0.1,  # Lower for factual extraction
@@ -820,7 +846,7 @@ This will be used to strengthen recommendations with data-backed connections."""
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=0.2,
@@ -892,7 +918,7 @@ Be strict - every action/recommendation MUST reference specific numbers from the
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=0.1,
@@ -964,7 +990,7 @@ Be helpful - suggest realistic improvements while maintaining rigor."""
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=0.2,
@@ -1036,7 +1062,7 @@ Make this publication-ready - every recommendation should withstand scrutiny."""
                     },
                     {
                         "role": "user",
-                        "content": prompt
+                        "content": self._prepare_prompt(prompt)
                     }
                 ],
                 temperature=OPENAI_TEMPERATURE,
