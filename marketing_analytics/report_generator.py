@@ -9,7 +9,8 @@ from typing import Dict, Any, List
 from datetime import datetime
 import json
 
-from config import BRAND_NAME, START_DATE, END_DATE, REPORTS_DIR
+from config import BRAND_NAME, START_DATE, END_DATE, REPORTS_DIR, REPORT_LANGUAGE
+from translations import get_text as _
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,14 @@ logger = logging.getLogger(__name__)
 class MarkdownReportGenerator:
     """Generate markdown format reports"""
 
-    def __init__(self, output_dir: Path = REPORTS_DIR):
+    def __init__(self, output_dir: Path = REPORTS_DIR, language: str = REPORT_LANGUAGE):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.lang = language
+
+    def _(self, key: str) -> str:
+        """Helper method to get translated text"""
+        return _(key, self.lang)
 
     def generate_comprehensive_report(self, analytics_data: Dict[str, Any],
                                      ai_insights: Dict[str, Any]) -> Path:
@@ -33,7 +39,7 @@ class MarkdownReportGenerator:
 
             # Executive Summary (AI-generated)
             if ai_insights.get('status') == 'success':
-                f.write("\n## 📊 Executive Summary\n\n")
+                f.write(f"\n## 📊 {self._('executive_summary')}\n\n")
                 f.write(ai_insights.get('executive_summary', 'N/A'))
                 f.write("\n\n")
 
@@ -110,11 +116,21 @@ class MarkdownReportGenerator:
 
     def _generate_header(self) -> str:
         """Generate report header"""
-        return f"""# {BRAND_NAME} - Social Media Marketing Analytics Report
+        # Format date based on language
+        if self.lang == 'es':
+            # Spanish months
+            months_es = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+            now = datetime.now()
+            date_str = f"{now.day} de {months_es[now.month-1]} de {now.year} a las {now.strftime('%I:%M %p')}"
+        else:
+            date_str = datetime.now().strftime('%B %d, %Y at %I:%M %p')
 
-**Report Generated:** {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
-**Analysis Period:** {START_DATE} to {END_DATE}
-**Platforms Analyzed:** Instagram, Facebook
+        return f"""# {BRAND_NAME} - {self._('report_title')}
+
+**{self._('report_generated')}:** {date_str}
+**{self._('analysis_period')}:** {START_DATE} to {END_DATE}
+**{self._('platforms_analyzed')}:** Instagram, Facebook
 
 ---
 
@@ -122,23 +138,23 @@ class MarkdownReportGenerator:
 
     def _generate_toc(self) -> str:
         """Generate table of contents"""
-        return """## 📑 Table of Contents
+        return f"""{self._('toc_title')}
 
-1. [Executive Summary](#executive-summary)
-2. [Overview](#overview)
-3. [Platform Performance](#platform-performance-comparison)
-4. [Engagement Analysis](#engagement-analysis)
-5. [Content Performance](#content-performance)
-6. [Hashtag Performance](#hashtag-performance)
-7. [Top Performers vs Average](#top-performers-vs-average)
-8. [Detailed Content Insights](#detailed-content-insights)
-9. [Trends Analysis](#trends-analysis)
-10. [Audience Demographics](#audience-demographics)
-11. [Best Posting Times](#optimal-posting-times)
-12. [AI Strategic Insights](#ai-powered-strategic-insights)
-13. [AI Strategic Action Plan](#ai-strategic-action-plan)
-14. [Recommendations](#recommendations)
-15. [Appendix](#appendix)
+1. [{self._('executive_summary')}](#executive-summary)
+2. [{self._('overview')}](#overview)
+3. [{self._('platform_performance')}](#platform-performance-comparison)
+4. [{self._('engagement_analysis')}](#engagement-analysis)
+5. [{self._('content_performance')}](#content-performance)
+6. [{self._('hashtag_performance')}](#hashtag-performance)
+7. [{self._('top_performers')}](#top-performers-vs-average)
+8. [{self._('detailed_content_insights')}](#detailed-content-insights)
+9. [{self._('trends_analysis')}](#trends-analysis)
+10. [{self._('audience_demographics')}](#audience-demographics)
+11. [{self._('best_posting_times')}](#optimal-posting-times)
+12. [{self._('ai_strategic_insights')}](#ai-powered-strategic-insights)
+13. [{self._('ai_strategic_action_plan')}](#ai-strategic-action-plan)
+14. [{self._('recommendations')}](#recommendations)
+15. [{self._('appendix')}](#appendix)
 
 ---
 
@@ -148,15 +164,16 @@ class MarkdownReportGenerator:
         """Generate overview section"""
         summary = data.get('summary', {})
 
-        output = "## 📈 Overview\n\n"
+        output = f"## 📈 {self._('overview')}\n\n"
 
         if summary:
-            output += "### Key Metrics Summary\n\n"
-            output += f"- **Data Files Analyzed:** {summary.get('data_counts', {}).get('timelines', 0) + summary.get('data_counts', {}).get('aggregations', 0)}\n"
-            output += f"- **Platforms:** {', '.join(summary.get('platforms', []))}\n"
+            output += f"### {self._('key_metrics_summary')}\n\n"
+            output += f"- **{self._('data_files_analyzed')}:** {summary.get('data_counts', {}).get('timelines', 0) + summary.get('data_counts', {}).get('aggregations', 0)}\n"
+            output += f"- **{self._('platforms')}:** {', '.join(summary.get('platforms', []))}\n"
 
             if 'date_range' in summary:
-                output += f"- **Period:** {summary['date_range'].get('days', 'N/A')} days\n"
+                days_text = self._('days') if self.lang == 'es' else 'days'
+                output += f"- **{self._('period')}:** {summary['date_range'].get('days', 'N/A')} {days_text}\n"
 
             output += "\n"
 
@@ -268,8 +285,8 @@ class MarkdownReportGenerator:
 
     def _generate_hashtag_performance(self, data: Dict[str, Any]) -> str:
         """Generate hashtag performance section"""
-        output = "\n---\n\n## #️⃣ Hashtag Performance\n\n"
-        output += "*Analysis of hashtag usage and effectiveness*\n\n"
+        output = f"\n---\n\n## #️⃣ {self._('hashtag_performance_title')}\n\n"
+        output += f"*{self._('hashtag_analysis')}*\n\n"
 
         content_perf = data.get('content_performance', {})
         hashtag_analysis = content_perf.get('hashtag_analysis', {})
@@ -315,8 +332,8 @@ class MarkdownReportGenerator:
             # Top performing hashtags
             hashtag_performance = hashtag_data.get('hashtag_performance', [])
             if hashtag_performance and len(hashtag_performance) > 0:
-                output += "**🏆 Top 10 Hashtags by Engagement:**\n\n"
-                output += "| Rank | Hashtag | Uses | Avg Engagement | Avg Reach | Avg Interactions |\n"
+                output += f"**{self._('top_10_hashtags')}:**\n\n"
+                output += f"| {self._('rank')} | {self._('hashtag')} | {self._('uses')} | {self._('avg_engagement')} | {self._('avg_reach')} | {self._('avg_interactions')} |\n"
                 output += "|------|---------|------|----------------|-----------|------------------|\n"
 
                 for i, hashtag in enumerate(hashtag_performance[:10], 1):
@@ -360,8 +377,8 @@ class MarkdownReportGenerator:
 
     def _generate_top_performers(self, data: Dict[str, Any]) -> str:
         """Generate top performers vs average comparison section"""
-        output = "\n---\n\n## 🏅 Top Performers vs Average\n\n"
-        output += "*Detailed comparison of best-performing content against period averages*\n\n"
+        output = f"\n---\n\n## 🏅 {self._('top_performers_title')}\n\n"
+        output += f"*{self._('detailed_comparison')}*\n\n"
 
         engagement = data.get('engagement', {})
         content_perf = data.get('content_performance', {})
@@ -415,8 +432,17 @@ class MarkdownReportGenerator:
                 content_type_name = "Content"
 
             # Show top 3
-            output += f"#### 🥇 Top 3 {content_type_name}\n\n"
-            output += "| Rank | Title | Date | Type | Engagement | Reach | Interactions | vs Avg Eng | Link |\n"
+            output += f"#### 🥇 {self._('top_3')} {content_type_name}\n\n"
+            rank_txt = self._('rank')
+            title_txt = self._('title')
+            date_txt = self._('date')
+            type_txt = self._('type')
+            eng_txt = self._('engagement')
+            reach_txt = self._('reach')
+            int_txt = self._('interactions')
+            vs_avg_txt = self._('vs_avg_eng')
+            link_txt = self._('link')
+            output += f"| {rank_txt} | {title_txt} | {date_txt} | {type_txt} | {eng_txt} | {reach_txt} | {int_txt} | {vs_avg_txt} | {link_txt} |\n"
             output += "|------|-------|------|------|------------|-------|--------------|------------|------|\n"
 
             for i, post in enumerate(top_posts[:3], 1):
