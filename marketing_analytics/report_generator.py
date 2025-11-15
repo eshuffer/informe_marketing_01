@@ -10,7 +10,7 @@ from datetime import datetime
 import json
 
 from config import BRAND_NAME, START_DATE, END_DATE, REPORTS_DIR, REPORT_LANGUAGE
-from translations import get_text as _
+from translations import get_text
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class MarkdownReportGenerator:
 
     def _(self, key: str) -> str:
         """Helper method to get translated text"""
-        return _(key, self.lang)
+        return get_text(key, self.lang)
 
     def generate_comprehensive_report(self, analytics_data: Dict[str, Any],
                                      ai_insights: Dict[str, Any]) -> Path:
@@ -230,7 +230,7 @@ class MarkdownReportGenerator:
                 # Best post
                 if 'best_post' in eng_data:
                     bp = eng_data['best_post']
-                    output += ff"\n**{self._('best_performing_post')}:**\n"
+                    output += f"\n**{self._('best_performing_post')}:**\n"
                     output += f"- Engagement Rate: {bp.get('engagement_rate', 0):.2f}%\n"
                     output += f"- Reach: {bp.get('reach', 'N/A'):,}\n" if isinstance(bp.get('reach'), (int, float)) else f"- Reach: {bp.get('reach', 'N/A')}\n"
                     if 'preview' in bp:
