@@ -52,6 +52,10 @@ class MarkdownReportGenerator:
             # Content Performance
             f.write(self._generate_content_performance(analytics_data))
 
+            # Hashtag Performance (only if data exists)
+            if self._has_hashtag_data(analytics_data):
+                f.write(self._generate_hashtag_performance(analytics_data))
+
             # Top Performers vs Average
             f.write(self._generate_top_performers(analytics_data))
 
@@ -125,15 +129,16 @@ class MarkdownReportGenerator:
 3. [Platform Performance](#platform-performance-comparison)
 4. [Engagement Analysis](#engagement-analysis)
 5. [Content Performance](#content-performance)
-6. [Top Performers vs Average](#top-performers-vs-average)
-7. [Detailed Content Insights](#detailed-content-insights)
-8. [Trends Analysis](#trends-analysis)
-9. [Audience Demographics](#audience-demographics)
-10. [Best Posting Times](#optimal-posting-times)
-11. [AI Strategic Insights](#ai-powered-strategic-insights)
-12. [AI Strategic Action Plan](#ai-strategic-action-plan)
-13. [Recommendations](#recommendations)
-14. [Appendix](#appendix)
+6. [Hashtag Performance](#hashtag-performance)
+7. [Top Performers vs Average](#top-performers-vs-average)
+8. [Detailed Content Insights](#detailed-content-insights)
+9. [Trends Analysis](#trends-analysis)
+10. [Audience Demographics](#audience-demographics)
+11. [Best Posting Times](#optimal-posting-times)
+12. [AI Strategic Insights](#ai-powered-strategic-insights)
+13. [AI Strategic Action Plan](#ai-strategic-action-plan)
+14. [Recommendations](#recommendations)
+15. [Appendix](#appendix)
 
 ---
 
@@ -261,6 +266,98 @@ class MarkdownReportGenerator:
 
         return output
 
+    def _generate_hashtag_performance(self, data: Dict[str, Any]) -> str:
+        """Generate hashtag performance section"""
+        output = "\n---\n\n## #️⃣ Hashtag Performance\n\n"
+        output += "*Analysis of hashtag usage and effectiveness*\n\n"
+
+        content_perf = data.get('content_performance', {})
+        hashtag_analysis = content_perf.get('hashtag_analysis', {})
+
+        if not hashtag_analysis:
+            return ""
+
+        # Process each platform/content type
+        for platform, hashtag_data in hashtag_analysis.items():
+            if 'error' in hashtag_data:
+                continue
+
+            # Extract platform name and type (e.g., "Instagram_Posts" -> "Instagram", "Posts")
+            platform_parts = platform.split('_')
+            platform_name = platform_parts[0] if len(platform_parts) > 0 else platform
+            content_type = platform_parts[1] if len(platform_parts) > 1 else "Content"
+
+            output += f"### {platform_name.title()} {content_type}\n\n"
+
+            # Overall statistics
+            total_hashtags = hashtag_data.get('total_unique_hashtags', 0)
+            posts_with = hashtag_data.get('posts_with_hashtags', 0)
+            posts_without = hashtag_data.get('posts_without_hashtags', 0)
+            avg_eng_with = hashtag_data.get('avg_engagement_with_hashtags', 0)
+            avg_eng_without = hashtag_data.get('avg_engagement_without_hashtags', 0)
+            hashtag_lift = hashtag_data.get('hashtag_lift', 0)
+
+            output += "**📊 Overall Hashtag Impact:**\n\n"
+            output += f"- **Total Unique Hashtags:** {total_hashtags}\n"
+            output += f"- **Posts with Hashtags:** {posts_with} ({posts_with / (posts_with + posts_without) * 100:.1f}%)\n" if (posts_with + posts_without) > 0 else "- **Posts with Hashtags:** 0\n"
+            output += f"- **Posts without Hashtags:** {posts_without}\n"
+            output += f"- **Avg Engagement with Hashtags:** {avg_eng_with:.2f}%\n"
+            output += f"- **Avg Engagement without Hashtags:** {avg_eng_without:.2f}%\n"
+
+            # Hashtag lift indicator
+            if hashtag_lift > 0:
+                output += f"- **Hashtag Lift:** 🔺 +{hashtag_lift:.1f}% (hashtags boost engagement)\n\n"
+            elif hashtag_lift < 0:
+                output += f"- **Hashtag Lift:** 🔻 {hashtag_lift:.1f}% (hashtags reduce engagement)\n\n"
+            else:
+                output += f"- **Hashtag Lift:** ➡️ No significant impact\n\n"
+
+            # Top performing hashtags
+            hashtag_performance = hashtag_data.get('hashtag_performance', [])
+            if hashtag_performance and len(hashtag_performance) > 0:
+                output += "**🏆 Top 10 Hashtags by Engagement:**\n\n"
+                output += "| Rank | Hashtag | Uses | Avg Engagement | Avg Reach | Avg Interactions |\n"
+                output += "|------|---------|------|----------------|-----------|------------------|\n"
+
+                for i, hashtag in enumerate(hashtag_performance[:10], 1):
+                    medal = ""
+                    if i == 1:
+                        medal = "🥇 "
+                    elif i == 2:
+                        medal = "🥈 "
+                    elif i == 3:
+                        medal = "🥉 "
+
+                    tag_name = hashtag.get('hashtag', '')
+                    usage = hashtag.get('usage_count', 0)
+                    avg_eng = hashtag.get('avg_engagement_rate', 0)
+                    avg_reach = hashtag.get('avg_reach', 0)
+                    avg_int = hashtag.get('avg_interactions', 0)
+
+                    output += f"| {medal}#{i} | {tag_name} | {usage} | {avg_eng:.2f}% | {avg_reach:,.0f} | {avg_int:,.1f} |\n"
+
+                output += "\n"
+
+                # Key insights
+                if len(hashtag_performance) >= 3:
+                    top_3_avg_eng = sum(h.get('avg_engagement_rate', 0) for h in hashtag_performance[:3]) / 3
+                    most_used = max(hashtag_performance, key=lambda x: x.get('usage_count', 0))
+
+                    output += "**💡 Key Insights:**\n\n"
+                    output += f"- Top 3 hashtags average {top_3_avg_eng:.2f}% engagement\n"
+                    output += f"- Most used hashtag: {most_used.get('hashtag', 'N/A')} ({most_used.get('usage_count', 0)} times)\n"
+
+                    if avg_eng_with > avg_eng_without:
+                        output += f"- ✅ **Recommendation:** Continue using hashtags - they improve engagement by {hashtag_lift:.1f}%\n"
+                    elif avg_eng_without > avg_eng_with:
+                        output += f"- ⚠️ **Recommendation:** Review hashtag strategy - posts without hashtags perform {abs(hashtag_lift):.1f}% better\n"
+
+                    output += "\n"
+
+            output += "---\n\n"
+
+        return output
+
     def _generate_top_performers(self, data: Dict[str, Any]) -> str:
         """Generate top performers vs average comparison section"""
         output = "\n---\n\n## 🏅 Top Performers vs Average\n\n"
@@ -284,7 +381,11 @@ class MarkdownReportGenerator:
             if not top_posts or len(top_posts) == 0:
                 continue
 
-            output += f"### {platform.title()}\n\n"
+            # Extract platform name and content type (e.g., "Instagram_Posts" -> "Instagram", "Posts")
+            platform_parts = platform.split('_')
+            platform_name = platform_parts[0] if len(platform_parts) > 0 else platform
+
+            output += f"### {platform_name.title()}\n\n"
 
             # Separate posts and reels based on platform naming or type
             # Assuming platform names like "Instagram_Posts" and "Instagram_Reels"
@@ -315,21 +416,39 @@ class MarkdownReportGenerator:
 
             # Show top 3
             output += f"#### 🥇 Top 3 {content_type_name}\n\n"
-            output += "| Rank | Engagement Rate | Reach | Interactions | vs Avg Engagement | vs Avg Reach | Link |\n"
-            output += "|------|----------------|-------|--------------|-------------------|-------------|------|\n"
+            output += "| Rank | Title | Date | Type | Engagement | Reach | Interactions | vs Avg Eng | Link |\n"
+            output += "|------|-------|------|------|------------|-------|--------------|------------|------|\n"
 
             for i, post in enumerate(top_posts[:3], 1):
                 eng_rate = post.get('metric_value', 0)
                 reach = post.get('reach', 0) if isinstance(post.get('reach'), (int, float)) else 0
                 interactions = post.get('interactions', 0) if isinstance(post.get('interactions'), (int, float)) else 0
 
+                # Get title (truncate if too long)
+                title = post.get('title', 'Untitled')
+                if len(title) > 50:
+                    title = title[:47] + "..."
+
+                # Get date (format nicely)
+                date_str = post.get('date', 'N/A')
+                if date_str != 'N/A' and len(date_str) > 10:
+                    # Try to format date nicely (YYYY-MM-DD HH:MM -> MM/DD)
+                    try:
+                        date_str = date_str[:10]  # Get just YYYY-MM-DD part
+                        parts = date_str.split('-')
+                        if len(parts) == 3:
+                            date_str = f"{parts[1]}/{parts[2]}"  # MM/DD
+                    except:
+                        pass
+
+                # Get content type
+                content_type_display = post.get('content_type', content_type_name)
+
                 # Calculate differences
                 eng_diff = ((eng_rate - comparison_avg_engagement) / comparison_avg_engagement * 100) if comparison_avg_engagement > 0 else 0
-                reach_diff = ((reach - comparison_avg_reach) / comparison_avg_reach * 100) if comparison_avg_reach > 0 else 0
 
                 # Format differences with + or -
                 eng_diff_str = f"+{eng_diff:.1f}%" if eng_diff >= 0 else f"{eng_diff:.1f}%"
-                reach_diff_str = f"+{reach_diff:.1f}%" if reach_diff >= 0 else f"{reach_diff:.1f}%"
 
                 # Medal emojis
                 medal = "🥇" if i == 1 else ("🥈" if i == 2 else "🥉")
@@ -339,9 +458,7 @@ class MarkdownReportGenerator:
 
                 # Create link - use external URL if available, otherwise link to detail section
                 if 'url' in post and post['url'] != 'N/A':
-                    link_text = "[🔗 View]"
-                    link_url = post['url']
-                    link_md = f"[🔗]({link_url})"
+                    link_md = f"[🔗]({post['url']})"
                 elif 'shortcode' in post and 'instagram' in platform.lower():
                     # Construct Instagram URL from shortcode
                     link_md = f"[🔗](https://www.instagram.com/p/{post['shortcode']}/)"
@@ -349,7 +466,7 @@ class MarkdownReportGenerator:
                     # Link to detail section within report
                     link_md = f"[📝](#{anchor_id})"
 
-                output += f"| {medal} #{i} | {eng_rate:.2f}% | {reach:,} | {interactions:,} | {eng_diff_str} | {reach_diff_str} | {link_md} |\n"
+                output += f"| {medal} #{i} | {title} | {date_str} | {content_type_display} | {eng_rate:.2f}% | {reach:,} | {interactions:,} | {eng_diff_str} | {link_md} |\n"
 
             output += "\n"
 
@@ -363,17 +480,48 @@ class MarkdownReportGenerator:
 
                     # Add anchor for internal linking
                     output += f'<a id="{anchor_id}"></a>\n\n'
-                    output += f"{medal} **Post #{i}**\n\n"
+
+                    # Title with content type indicator
+                    content_type_display = post.get('content_type', content_type_name)
+                    title = post.get('title', f'Post #{i}')
+                    output += f"{medal} **{title}** ({content_type_display})\n\n"
 
                     # Add date if available
                     if 'date' in post:
                         output += f"- **Posted:** {post['date']}\n"
 
-                    # Add metrics
+                    # Add title if separate from above
+                    if 'title' in post and post.get('title') != title:
+                        output += f"- **Title:** {post['title']}\n"
+
+                    # Add comprehensive metrics
                     eng_rate = post.get('metric_value', 0)
                     reach = post.get('reach', 'N/A')
                     interactions = post.get('interactions', 'N/A')
-                    output += f"- **Performance:** {eng_rate:.2f}% engagement | {reach:,} reach | {interactions:,} interactions\n" if isinstance(reach, (int, float)) and isinstance(interactions, (int, float)) else f"- **Performance:** {eng_rate:.2f}% engagement\n"
+                    likes = post.get('likes', 'N/A')
+                    comments = post.get('comments', 'N/A')
+                    shares = post.get('shares', 'N/A')
+                    saves = post.get('saves', 'N/A')
+
+                    output += f"- **Engagement Rate:** {eng_rate:.2f}%\n"
+                    if isinstance(reach, (int, float)) and reach != 'N/A':
+                        output += f"- **Reach:** {reach:,}\n"
+                    if isinstance(interactions, (int, float)) and interactions != 'N/A':
+                        output += f"- **Total Interactions:** {interactions:,}\n"
+
+                    # Detailed metrics breakdown
+                    metrics_line = []
+                    if isinstance(likes, (int, float)) and likes != 'N/A' and likes > 0:
+                        metrics_line.append(f"❤️ {likes:,} likes")
+                    if isinstance(comments, (int, float)) and comments != 'N/A' and comments > 0:
+                        metrics_line.append(f"💬 {comments:,} comments")
+                    if isinstance(shares, (int, float)) and shares != 'N/A' and shares > 0:
+                        metrics_line.append(f"🔄 {shares:,} shares")
+                    if isinstance(saves, (int, float)) and saves != 'N/A' and saves > 0:
+                        metrics_line.append(f"🔖 {saves:,} saves")
+
+                    if metrics_line:
+                        output += f"- **Details:** {' | '.join(metrics_line)}\n"
 
                     # Add link if available
                     if 'url' in post and post['url'] != 'N/A':
@@ -384,9 +532,12 @@ class MarkdownReportGenerator:
 
                     # Add content
                     if 'full_text' in post:
-                        output += f"\n**Content:**\n\n> {post['full_text'][:500]}\n\n"
+                        full_text = post['full_text']
+                        output += f"\n**Caption:**\n\n> {full_text[:500]}\n\n"
+                        if len(full_text) > 500:
+                            output += f"*[Caption truncated - {len(full_text)} characters total]*\n\n"
                     elif 'preview' in post:
-                        output += f"\n**Preview:**\n\n> {post['preview']}\n\n"
+                        output += f"\n**Caption Preview:**\n\n> {post['preview']}\n\n"
 
                     output += "---\n\n"
 
@@ -530,6 +681,12 @@ class MarkdownReportGenerator:
                 if data_array and len(data_array) > 0:
                     return True
         return False
+
+    def _has_hashtag_data(self, data: Dict[str, Any]) -> bool:
+        """Check if hashtag data exists"""
+        content_perf = data.get('content_performance', {})
+        hashtag_analysis = content_perf.get('hashtag_analysis', {})
+        return bool(hashtag_analysis and any('error' not in v for v in hashtag_analysis.values()))
 
     def _generate_enhanced_insights(self, data: Dict[str, Any]) -> str:
         """Generate enhanced content insights section"""

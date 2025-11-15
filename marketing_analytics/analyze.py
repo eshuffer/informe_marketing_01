@@ -17,7 +17,8 @@ from analytics_processors import (
     EngagementAnalyzer,
     TrendAnalyzer,
     DemographicAnalyzer,
-    ContentPerformanceAnalyzer
+    ContentPerformanceAnalyzer,
+    HashtagAnalyzer
 )
 from enhanced_analytics import EnhancedContentAnalyzer
 from ai_insights import AIInsightGenerator
@@ -47,6 +48,7 @@ class MarketingAnalytics:
         self.trend_analyzer = TrendAnalyzer()
         self.demo_analyzer = DemographicAnalyzer()
         self.content_analyzer = ContentPerformanceAnalyzer()
+        self.hashtag_analyzer = HashtagAnalyzer()
         self.enhanced_analyzer = EnhancedContentAnalyzer()
         self.ai_generator = AIInsightGenerator()
         self.topic_insights_generator = TopicBasedInsightsGenerator()
@@ -174,16 +176,63 @@ class MarketingAnalytics:
         # Top performing content
         top_content = {}
         for platform in ENABLED_PLATFORMS:
+            # Get top posts
             posts_df = self.loader.get_posts_dataframe(platform, 'posts')
             if posts_df is not None:
                 top_posts = self.content_analyzer.find_top_performing_content(
-                    posts_df, metric='engagement_rate', top_n=10
+                    posts_df, metric='engagement_rate', top_n=10, content_type='posts'
                 )
                 if top_posts:
-                    top_content[platform] = top_posts
+                    # Use key format: "Instagram_Posts" to match engagement section keys
+                    key = f"{platform.title()}_Posts"
+                    top_content[key] = top_posts
+
+            # Get top reels
+            reels_df = self.loader.get_posts_dataframe(platform, 'reels')
+            if reels_df is not None:
+                top_reels = self.content_analyzer.find_top_performing_content(
+                    reels_df, metric='engagement_rate', top_n=10, content_type='reels'
+                )
+                if top_reels:
+                    # Use key format: "Instagram_Reels" to match engagement section keys
+                    key = f"{platform.title()}_Reels"
+                    top_content[key] = top_reels
+
+            # Get top stories (if available)
+            stories_df = self.loader.get_posts_dataframe(platform, 'stories')
+            if stories_df is not None:
+                top_stories = self.content_analyzer.find_top_performing_content(
+                    stories_df, metric='engagement_rate', top_n=10, content_type='stories'
+                )
+                if top_stories:
+                    # Use key format: "Instagram_Stories" to match engagement section keys
+                    key = f"{platform.title()}_Stories"
+                    top_content[key] = top_stories
 
         if top_content:
             content_results['top_content'] = top_content
+
+        # Analyze hashtag performance
+        hashtag_results = {}
+        for platform in ENABLED_PLATFORMS:
+            # Analyze hashtags in posts
+            posts_df = self.loader.get_posts_dataframe(platform, 'posts')
+            if posts_df is not None and not posts_df.empty:
+                logger.info(f"  Analyzing hashtags in {platform} posts...")
+                posts_hashtags = self.hashtag_analyzer.analyze_hashtag_performance(posts_df)
+                if 'error' not in posts_hashtags:
+                    hashtag_results[f"{platform.title()}_Posts"] = posts_hashtags
+
+            # Analyze hashtags in reels
+            reels_df = self.loader.get_posts_dataframe(platform, 'reels')
+            if reels_df is not None and not reels_df.empty:
+                logger.info(f"  Analyzing hashtags in {platform} reels...")
+                reels_hashtags = self.hashtag_analyzer.analyze_hashtag_performance(reels_df)
+                if 'error' not in reels_hashtags:
+                    hashtag_results[f"{platform.title()}_Reels"] = reels_hashtags
+
+        if hashtag_results:
+            content_results['hashtag_analysis'] = hashtag_results
 
         self.analytics_results['content_performance'] = content_results
 
