@@ -83,14 +83,14 @@ class MarkdownReportGenerator:
             # AI Strategic Insights
             if ai_insights.get('status') == 'success':
                 f.write("\n---\n\n")
-                f.write("## 🤖 AI-Powered Strategic Insights\n\n")
+                f.write(f"## 🤖 {self._('ai_strategic_insights')}\n\n")
                 f.write(ai_insights.get('insights', 'No insights generated'))
                 f.write("\n\n")
 
                 # AI Strategic Recommendations (separate from data-based recommendations)
                 if ai_insights.get('strategic_recommendations'):
                     f.write("\n---\n\n")
-                    f.write("## 🎯 AI Strategic Action Plan\n\n")
+                    f.write(f"## 🎯 {self._('ai_strategic_action_plan')}\n\n")
                     f.write(ai_insights.get('strategic_recommendations'))
                     f.write("\n\n")
 
@@ -99,11 +99,11 @@ class MarkdownReportGenerator:
                     tokens = ai_insights['tokens']
                     cost = ai_insights.get('cost_estimate', 0)
                     f.write("\n---\n\n")
-                    f.write("### 💡 AI Analysis Metrics\n\n")
-                    f.write(f"- **Total tokens used:** {tokens.get('prompt', 0) + tokens.get('completion', 0):,}\n")
-                    f.write(f"- **Input tokens:** {tokens.get('prompt', 0):,}\n")
-                    f.write(f"- **Output tokens:** {tokens.get('completion', 0):,}\n")
-                    f.write(f"- **Estimated cost:** ${cost:.4f}\n\n")
+                    f.write(f"### {self._('ai_analysis_metrics')}\n\n")
+                    f.write(f"- **{self._('total_tokens_used')}:** {tokens.get('prompt', 0) + tokens.get('completion', 0):,}\n")
+                    f.write(f"- **{self._('input_tokens')}:** {tokens.get('prompt', 0):,}\n")
+                    f.write(f"- **{self._('output_tokens')}:** {tokens.get('completion', 0):,}\n")
+                    f.write(f"- **{self._('estimated_cost')}:** ${cost:.4f}\n\n")
 
             # Recommendations
             f.write(self._generate_recommendations(analytics_data))
@@ -181,19 +181,19 @@ class MarkdownReportGenerator:
 
     def _generate_platform_performance(self, data: Dict[str, Any]) -> str:
         """Generate platform comparison section"""
-        output = "## 🏆 Platform Performance Comparison\n\n"
+        output = f"## 🏆 {self._('platform_performance')}\n\n"
 
         comparison = data.get('platform_comparison', {})
 
         if comparison:
-            output += "### Instagram vs Facebook\n\n"
-            output += "| Metric | Instagram | Facebook |\n"
+            output += f"### Instagram {self._('vs')} Facebook\n\n"
+            output += f"| {self._('metric')} | Instagram | Facebook |\n"
             output += "|--------|-----------|----------|\n"
 
             for metric, values in comparison.items():
                 if isinstance(values, dict):
-                    ig_val = values.get('instagram', 'N/A')
-                    fb_val = values.get('facebook', 'N/A')
+                    ig_val = values.get('instagram', self._('n_a'))
+                    fb_val = values.get('facebook', self._('n_a'))
 
                     # Format numbers
                     if isinstance(ig_val, (int, float)):
@@ -203,14 +203,14 @@ class MarkdownReportGenerator:
 
                     output += f"| {metric.replace('_', ' ').title()} | {ig_val} | {fb_val} |\n"
         else:
-            output += "*Platform comparison data not available*\n"
+            output += f"*{self._('no_data_available')}*\n"
 
         output += "\n"
         return output
 
     def _generate_engagement_section(self, data: Dict[str, Any]) -> str:
         """Generate engagement analysis section"""
-        output = "## 💬 Engagement Analysis\n\n"
+        output = f"## 💬 {self._('engagement_analysis')}\n\n"
 
         engagement = data.get('engagement', {})
 
@@ -230,7 +230,7 @@ class MarkdownReportGenerator:
                 # Best post
                 if 'best_post' in eng_data:
                     bp = eng_data['best_post']
-                    output += f"\n**Best Performing Post:**\n"
+                    output += ff"\n**{self._('best_performing_post')}:**\n"
                     output += f"- Engagement Rate: {bp.get('engagement_rate', 0):.2f}%\n"
                     output += f"- Reach: {bp.get('reach', 'N/A'):,}\n" if isinstance(bp.get('reach'), (int, float)) else f"- Reach: {bp.get('reach', 'N/A')}\n"
                     if 'preview' in bp:
@@ -242,14 +242,14 @@ class MarkdownReportGenerator:
 
     def _generate_content_performance(self, data: Dict[str, Any]) -> str:
         """Generate content performance section"""
-        output = "## 🎨 Content Performance\n\n"
+        output = f"## 🎨 {self._('content_performance')}\n\n"
 
         content_perf = data.get('content_performance', {})
 
         # Content type comparison
         if 'content_type_comparison' in content_perf:
             comp = content_perf['content_type_comparison']
-            output += "### Posts vs Reels Comparison\n\n"
+            output += f"### {self._('posts_vs_reels')}\n\n"
 
             if 'posts' in comp:
                 output += f"**Regular Posts:**\n"
@@ -269,7 +269,7 @@ class MarkdownReportGenerator:
 
         # Top performing content
         if 'top_content' in content_perf:
-            output += "### Top Performing Content\n\n"
+            output += f"### {self._('top_performing_content')}\n\n"
             for platform, top_posts in content_perf['top_content'].items():
                 if top_posts and len(top_posts) > 0:
                     output += f"**{platform.title()} Top Posts:**\n\n"
@@ -653,13 +653,13 @@ class MarkdownReportGenerator:
 
     def _generate_recommendations(self, data: Dict[str, Any]) -> str:
         """Generate recommendations section"""
-        output = "## 💡 Recommendations\n\n"
+        output = f"## 💡 {self._('recommendations')}\n\n"
 
         # Based on data analysis, generate recommendations
         engagement = data.get('engagement', {})
         content_perf = data.get('content_performance', {})
 
-        output += "### Content Strategy\n\n"
+        output += f"### {self._('content_strategy')}\n\n"
 
         # Content type recommendation
         if 'content_type_comparison' in content_perf:
@@ -849,9 +849,9 @@ class MarkdownReportGenerator:
 
     def _generate_appendix(self, data: Dict[str, Any]) -> str:
         """Generate appendix with methodology"""
-        output = "## 📋 Appendix\n\n"
+        output = f"## 📋 {self._('appendix')}\n\n"
 
-        output += "### Methodology\n\n"
+        output += f"### {self._('methodology')}\n\n"
         output += "This report analyzes data from Metricool API covering all available metrics for the specified period.\n\n"
 
         output += "**Engagement Rate Calculation:**\n"
