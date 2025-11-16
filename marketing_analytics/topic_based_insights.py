@@ -69,7 +69,9 @@ class TopicBasedInsightsGenerator:
     def _get_system_prompt(self) -> str:
         """Get system prompt in the appropriate language"""
         if self.language == 'es':
-            return """Eres un estratega de marketing en redes sociales de élite con más de 15 años de experiencia.
+            return """IDIOMA OBLIGATORIO: Debes responder EXCLUSIVAMENTE en ESPAÑOL. Cada palabra, cada oración, cada párrafo debe estar en español. NO uses inglés bajo ninguna circunstancia.
+
+Eres un estratega de marketing en redes sociales de élite con más de 15 años de experiencia.
 Has gestionado cuentas con millones de seguidores y constantemente logras un engagement 3-5x superior al promedio de la industria.
 Comprendes profundamente los algoritmos de las plataformas y proporcionas insights que impactan directamente el crecimiento del negocio.
 
@@ -79,7 +81,9 @@ CRÍTICO: Tus recomendaciones SIEMPRE son:
 3. Muestran cálculos para estimaciones de impacto (ej., "7.12% × 1.20 = 8.54%")
 4. Verificables - otro analista debería poder verificar tus fuentes
 
-NUNCA das consejos vagos o genéricos. Cada insight debe estar basado en evidencia."""
+NUNCA das consejos vagos o genéricos. Cada insight debe estar basado en evidencia.
+
+RECORDATORIO FINAL: Tu respuesta COMPLETA debe estar en ESPAÑOL."""
         else:
             return """You are an elite social media marketing strategist with 15+ years experience.
 You've managed accounts with millions of followers and consistently achieve 3-5x industry average engagement.
@@ -432,6 +436,18 @@ Focus EXCLUSIVELY on {description}.
                 topic_name, description, data_summary, consolidated_context
             )
 
+            # Debug: Print what we're sending to OpenAI
+            system_prompt = self._get_system_prompt()
+            print(f"\n{'#'*80}")
+            print(f"DEBUG: SENDING TO OPENAI - Topic: {topic_name}")
+            print(f"{'#'*80}")
+            print(f"Language setting: {self.language}")
+            print(f"\nSYSTEM PROMPT (first 300 chars):")
+            print(system_prompt[:300])
+            print(f"\nUSER PROMPT (first 500 chars):")
+            print(prompt[:500])
+            print(f"{'#'*80}\n")
+
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
                 messages=[
@@ -448,9 +464,19 @@ Focus EXCLUSIVELY on {description}.
                 max_tokens=3000  # Increased for more detailed responses
             )
 
+            # Log OpenAI response for debugging
+            openai_response = response.choices[0].message.content
+            print(f"\n{'='*80}")
+            print(f"OPENAI RESPONSE FOR: {topic_name}")
+            print(f"{'='*80}")
+            print(f"Language setting: {self.language}")
+            print(f"First 500 characters of response:")
+            print(openai_response[:500])
+            print(f"{'='*80}\n")
+
             return {
                 'status': 'success',
-                'content': response.choices[0].message.content,
+                'content': openai_response,
                 'tokens': {
                     'prompt': response.usage.prompt_tokens,
                     'completion': response.usage.completion_tokens
@@ -639,9 +665,19 @@ Use executive language - strategic, outcome-focused, and financially aware.
                 max_tokens=1500  # Increased for longer executive summary
             )
 
+            # Log OpenAI response for debugging
+            openai_response = response.choices[0].message.content
+            print(f"\n{'='*80}")
+            print(f"OPENAI RESPONSE FOR: EXECUTIVE SUMMARY")
+            print(f"{'='*80}")
+            print(f"Language setting: {self.language}")
+            print(f"First 500 characters of response:")
+            print(openai_response[:500])
+            print(f"{'='*80}\n")
+
             return {
                 'status': 'success',
-                'content': response.choices[0].message.content,
+                'content': openai_response,
                 'tokens': {
                     'prompt': response.usage.prompt_tokens,
                     'completion': response.usage.completion_tokens
@@ -959,9 +995,19 @@ Make this worth $10,000 in consulting value - deeply customized to THEIR data.
                 max_tokens=3500  # Maximum allowed for detailed recommendations
             )
 
+            # Log OpenAI response for debugging
+            openai_response = response.choices[0].message.content
+            print(f"\n{'='*80}")
+            print(f"OPENAI RESPONSE FOR: STRATEGIC RECOMMENDATIONS")
+            print(f"{'='*80}")
+            print(f"Language setting: {self.language}")
+            print(f"First 500 characters of response:")
+            print(openai_response[:500])
+            print(f"{'='*80}\n")
+
             return {
                 'status': 'success',
-                'content': response.choices[0].message.content,
+                'content': openai_response,
                 'tokens': {
                     'prompt': response.usage.prompt_tokens,
                     'completion': response.usage.completion_tokens
